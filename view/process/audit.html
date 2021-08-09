@@ -1,0 +1,75 @@
+{extend name="base/base"}
+{block name="bodycontent"}
+    <div class="page-bar">
+        <ul class="page-breadcrumb">
+            <li>
+                <a href="/">首页</a>
+                <i class="fa fa-angle-right"></i>
+            </li>
+            <li>
+                <span>{$pageTitle ?? '标题'}</span>
+            </li>
+        </ul>
+    </div>
+    <h1 class="page-title">
+        {$pageTitle ?? '标题'}
+        <small>{$smallTitle ?? ''}</small>
+    </h1>
+    <div class="portlet light bordered form-fit">
+        <div class="portlet-title">
+            <div class="caption">
+                <span class="caption-subject font-blue-hoki bold uppercase">{$pageTitle}--审核</span>
+            </div>
+        </div>
+        <div class="portlet-body form">
+            <form action="{$__URL__}/audit" method="post" id="pageform" class="form-horizontal form-bordered form-row-stripped pageForm">
+                <input type="hidden" name="id" value="{$id}">
+                <input type="hidden" name="audit" value="{$audit}">
+                <input type="hidden" value="{$process_id}" name="process_id">
+                <div class="form-body tabbable-line">
+                    {php}$isshow = array(1,5);{/php}
+                    {include file="process/attribute_common"}
+                    <div class="form-group col-md-12">
+                        <input type="hidden" id="audit" name="audit" value="">
+                        <label class="control-label col-md-3">审核备注</label>
+                        <div class="col-md-8">
+                            <textarea name="auditvalue" class="form-control" rows="3"></textarea>
+                            <input type="hidden" name="auditvalue1" value="{$data.auditvalue ?? ''}">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <div class="row">
+                        <div class="col-md-offset-3 col-md-9">
+                            <button type="submit" class="btn blue-oleo auditbtn loading-btn" data-audit="" data-loading-text="提交中...">
+                                <i class="fa fa-pencil-square-o"></i> 
+                                备注
+                            </button>
+                            <button type="submit" class="btn green auditbtn loading-btn" data-loading-text="提交中..." data-audit="{$writablefields.audit ?? ''}">
+                                <i class="fa fa-check"></i> 
+                                审核通过
+                            </button>
+                            {if condition="display($__URL__.'/reject')"}
+                                <button type="submit" class="btn red-thunderbird auditbtn loading-btn" data-audit="-1" data-loading-text="提交中...">
+                                    <i class="fa fa-backward"></i> 
+                                    审核驳回
+                                </button>
+                            {/if}
+                            {if condition="display($__URL__.'/end')"}
+                                <button type="submit" class="btn bg-blue-ebonyclay bg-font-blue-ebonyclay auditbtn loading-btn" data-audit="-{$writablefields.audit ?? ''}" data-loading-text="提交中...">
+                                    <i class="fa fa-stop"></i> 
+                                    结束流程
+                                </button>
+                            {/if}
+                            <button type="button" class="btn default" onclick="history.back();">返回</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{/block}
+
+{block name="inc"}
+    {include file="process/inc"}
+{/block}

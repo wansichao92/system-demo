@@ -1,0 +1,57 @@
+{extend name="base/base"}
+{block name="bodycontent"}
+    <div class="page-bar">
+        <ul class="page-breadcrumb">
+            <li>
+                <a href="/">首页</a>
+                <i class="fa fa-angle-right"></i>
+            </li>
+            <li>
+                <span>{$pageTitle ?? '标题'}</span>
+            </li>
+        </ul>
+    </div>
+    <h1 class="page-title">
+        {$pageTitle ?? '标题'}
+        <small>{$smallTitle ?? ''}</small>
+    </h1>
+    <div class="row">
+        {include file="process/extra_add"}
+    </div>
+    <div class="portlet light bordered form-fit">
+        <div class="portlet-title">
+            <div class="caption">
+                <span class="caption-subject font-blue-hoki bold uppercase">{$pageTitle}</span>
+            </div>
+        </div>
+        <div class="portlet-body form">
+            <form action="{$__URL__}/add" method="post" enctype="multipart/form-data" id="pageform" class="form-horizontal form-bordered form-row-stripped pageForm">
+                <input type="hidden" value="{$process_id}" name="process_id">
+                {notempty name="work_id"}
+                    {foreach name="pre_fields" item="vo"}
+                        <input type="hidden" name="{$key}" value="{$vo}">
+                    {/foreach}
+                    <input type="hidden" name="work_id" value="{$work_id}">
+                    <input type="hidden" name="pre_process_id" value="{$pre_process_id}">
+                    <input type="hidden" name="processextra" value="{$processextra}">
+                {/notempty}
+                <div class="form-body tabbable-line">
+                    {php}$isshow = array(1,2);{/php}
+                    {include file="process/attribute_common"}
+                </div>
+                <div class="form-actions">
+                    <div class="row">
+                        <div class="col-md-offset-3 col-md-9">
+                            <button type="submit" class="btn green loading-btn" data-loading-text="提交中..."><i class="fa fa-check"></i> 提交</button>
+                            <button type="button" class="btn default" onclick="history.back();">返回</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{/block}
+
+{block name="inc"}
+    {include file="process/inc"}
+{/block}

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {include file='publics/head'}
+        {load href="__FRAME__/global/css/components.min.css"}
+        {load href="__FRAME__/pages/css/login.min.css"}
+        <style>
+            .logo>span{ font-size: 18px; color: #fff;}
+            .c-e43f41{color: #e43f41;}
+        </style>
+    </head>
+    <body class="login">
+        <!-- 拼图验证 -->
+        <div class="widgets__box">
+            <div class="widgets__window_back"></div>
+            <div class="widgets__img_check_box" id="select">
+                <div class="widgets__td-pop-title">请拖动下方滑块完成拼图</div>
+                <div class="widgets__img_display">
+                    <div class="widgets__img_tishi"></div>
+                    <div class="widgets__img_cnt">
+                        <img src1="a.jpg" class="widgets__img_src" />
+                        <canvas class="widgets__img_fragment_hollow"></canvas>
+                        <div class="widgets__img_fragment_cnt">
+                            <canvas class="widgets__img_fragment widgets__img_fragment_shadow"></canvas>
+                            <canvas class="widgets__img_fragment widgets__img_fragment_content"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="widgets__smooth_cnt">
+                    <div class="widgets__smooth_bar">请向右拖动滑块</div>
+                    <div class="widgets__smooth_circle"></div>
+                </div>
+                <div class="widgets__icon_refresh">
+                    <span class="icon-refresh"></span>
+                </div>
+                <div class="widgets__icon_close">
+                    <span class="icon-close"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="logo">
+            <span>WSC-FRA<span class="c-e43f41">ME</span></span></span>
+        </div>
+        
+        <div class="content">
+            <form class="login-form" action='/publics/login' method="post">
+                <input class="verifyCode" type="hidden" name="verifycode" />
+                <h3 class="form-title font-green">帐号登入</h3>
+                <div class="alert alert-danger display-hide">
+                    <button class="close" data-close="alert"></button>
+                    <span> 错误提示. </span>
+                </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">工号</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="text" autocomplete="off" placeholder="工号" name="username" oninput="value=value.replace(/[^\d]/g,'')"/> </div>
+                <div class="form-group">
+                    <label class="control-label visible-ie8 visible-ie9">密码</label>
+                    <input class="form-control form-control-solid placeholder-no-fix" type="password" autocomplete="off" placeholder="密码" name="password" /> </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn green uppercase" style="display:none;" disabled="disabled">登录</button>
+                    <div class="btn green pull-right widgets-but">登录</div>
+                </div>
+                <div>
+                    <p>"{$oneText}"</p>
+                </div>
+                <div class="create-account">
+                    <p>
+                        <a href="javascript:;" id="register-btn" class="uppercase">切换扫码登入</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+        <div class="copyright"> © 2021 wsc92.cn 赣ICP备19008489号-1 </div>
+        {include file='publics/script'}
+        {load href="__PLUG__/imgCheck/img_smooth_check.css"}
+        {load href="__PLUG__/imgCheck/img_smooth_check.js"}
+        <script>
+            // 键盘提交
+            $(document).keyup(function(event){
+                if(event.keyCode==13){
+                    $(".widgets-but").trigger('click');
+                    return false;
+                }
+            });
+
+            // 启动&关闭 拼图验证模块
+            $(".widgets-but").click(function(){
+                let username = $("input[name='username']").val();
+                let password = $("input[name='password']").val();
+                if(!username){
+                    $(".display-hide").slideDown();
+                    $(".alert>span").text("您还未输入帐号！");
+                }else if(!password){
+                    $(".display-hide").slideDown();
+                    $(".alert>span").text("您还未输入秘密！");
+                }else{
+                    $(".display-hide").slideUp();
+                    img_check_show();
+                }
+            })
+            $(".widgets__icon_close").click(function(){
+                img_check_hide();
+            })
+            
+            // 拼图验证
+            var s = WIDGETS.imgSmoothCheck({
+                selector: "#select",
+                data: ["__IMG__/check-img1.png", "__IMG__/check-img2.png", "__IMG__/check-img3.png", "__IMG__/check-img4.png"],//图片库
+                imgHeight: 180,//宽
+                imgWidth: 320,//长
+                allowableErrorValue: 4,//容错范围
+                success: function() {
+                    $.ajax({
+                        url:'/Publics/getVerifyCode',
+                        type:'POST',
+                        data:{"key":1},
+                        success:function(data){
+                            $(".verifyCode").val(data);
+                            $(".widgets-but").css("display", "none");
+                            $("button[type='submit']").css("display", "block").attr("disabled",false);
+                            $(".widgets__img_tishi").text('验证成功！').css("background", "#1bd04a").slideDown();
+                            setTimeout(function () { 
+                                img_check_hide();
+                                $("button[type='submit']").trigger('click');
+                            }, 1500); 
+                        }
+                    })
+                },
+                error: function(res) {
+                    $(".widgets__img_tishi").text('验证失败！').css("background", "#ef853bf2").slideDown();
+                    $('#select').shake(2, 10, 400);
+                    setTimeout(function () { 
+                        $(".widgets__img_tishi").slideUp();
+                    }, 1000); 
+                }
+            });
+
+            // 判断浏览器版本
+            FuckInternetExplorer()
+            function FuckInternetExplorer() {
+                var browser = navigator.appName;
+                var b_version = navigator.appVersion;
+                var version = b_version.split(";");
+                if (version.length > 1) {
+                    var trim_Version = parseInt(version[1].replace(/[ ]/g, "").replace(/MSIE/g, ""));
+                    if (trim_Version < 9) {
+                        alert("您的浏览器版本太低，快升级你的浏览器吧~");
+                        return false;
+                    }
+                }
+            }
+
+            // 隐藏拼图
+            function img_check_hide() {
+                $('.widgets__window_back').css("display", "none");
+                $('.widgets__img_check_box').css('z-index','-1').css('top','10000px').css('left','10000px');
+            }
+
+            // 显示拼图
+            function img_check_show() {
+                $('.widgets__window_back').css("display", "block");
+                $('.widgets__img_check_box').css('z-index','10000001').css('top','50%').css('left','50%');
+            }
+
+            // 验证错误抖动效果
+            $.fn.shake = function (intShakes, intDistance, intDuration) {
+                this.each(function () {
+                    var jqNode      = $(this);
+                    var windowWidth = $(window).width();
+                    var selfWidth   = jqNode.width();
+                    var animateLeft = ((windowWidth-selfWidth-30)/2)+175;
+                    jqNode.css({ position: 'fixed' });
+                    for (var x = 1; x <= intShakes; x++) {
+                        jqNode
+                            .animate({ left: (animateLeft + 10) }, (((intDuration / intShakes) / 4)))
+                            .animate({ left: animateLeft }, ((intDuration / intShakes) / 2))
+                            .animate({ left: animateLeft }, (((intDuration / intShakes) / 4)));
+                    }
+                });
+                return this;
+            }
+	    </script>
+    </body>
+</html>

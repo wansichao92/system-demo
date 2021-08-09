@@ -1,0 +1,137 @@
+第一阶段 = 把代码写好 / tp6个人框架
+第二阶段 = 面向对象深入 / 重构 / 设计模式
+第三阶段 = Swoole / php底层知识
+
+
+
+lnmp nginx restart
+sudo service php-fpm restart
+重启mysql：lnmp mysql restart
+cd /usr/local/nginx/sbin ./nginx -s reload
+
+5.6100+(150+100+100+300+300)=7050 **
+6.6900+(150+100+100+300+350)=7900
+7.7700+(150+100+100+300+350)=8700 
+8.8500+(150+100+100+300+350)=9500 --
+
+------------------------------------------------------------------------------
+
+操作流程
+
+自动创建curd
+1.menu菜单
+2.创建model表
+3.创建控制器和视图
+4.attribute表添加属性+数据表（主表）
+5.绑定权限
+
+自动创建流程
+1.erp_process_type 父级菜单
+2.erp_process菜单
+3.创建model表 
+4.attribute表添加属性+数据表（主表/audit/task）
+5.erp_processnode设置流程
+
+----------------------------------------------------------------------------------
+
+数据表
+
+attribute -- 字典
+model -- 模型
+process_type -- 流程菜单1
+process -- 流程菜单2
+processnode -- 审核过程
+audit_1 -- 流程审核
+task_1 -- 流程权限
+(xxxx) -- 主流程1表
+auth_extend -- 权限1
+auth_group -- 权限2
+auth_group_access -- 权限3
+auth_group_lend -- 权限4
+auth_rule -- 权限5
+menu -- 菜单
+file -- 文件上传
+hr_group -- 部门
+user -- 人员
+user_log -- 操作记录
+
+----------------------------------------------------------------------------------
+
+文件结构
+
+控制器
+Common -- 父级1
+Pcommon -- 父级2
+Process -- 流程
+Crontab -- 计划任务
+Index -- 项目首页
+Public -- 入口（登入）
+File -- 文件上传
+User -- 人员
+
+模型
+Attribute -- 流程数据属性模型
+Audit -- 流程审核模型
+AuthGroup -- 用户组模型类
+File -- 文件上传模型
+LcOrders -- 流程单（主流程）模型
+Process -- 流程模型
+Task -- 流程任务模型
+
+视图
+base/common.html -- 父级框架
+Public/head -- head标签
+Public/header -- 头部
+Public/sidebar -- 导航
+Public/body -- 主体内容
+Public/footer -- 底部
+Public/script -- 单个页面引用的js
+
+项目公共方法
+home/common/function
+
+框架公共方法
+common/common/log -- 记录一些日志
+common/common/function
+common/common/fieldFunc
+common/common/hrFunc
+common/common/jzqFunc
+common/common/xzFunc
+...
+
+逻辑层 Logic
+BaseLogic.class.php
+TaskLogic.class.php
+
+------------------------------------------------------------------
+
+BaseLogic 基础验证
+add_edit_common 引入封装
+样式重构（view）
+执行类
+统一输出变量 封装到类里
+
+index
+部门筛选
+滚动条
+审核人过多
+首页js
+页面table滚动条
+userGroupList方法有问题
+
+add
+attribute js加载问题
+添加字段问题
+task添加数据 task类
+
+edit
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,489 @@
+dd123456
+
+10月
+学习育儿知识，视频/笔记脑图/书籍
+取名字
+准备生日礼物
+保养+洗车 10.25
+胎心监护+B超 10.25/10.31
+
+11月
+确定名字
+足月/拍视频/装包 11.8
+双十一
+
+购物清单
+
+双十一   = [纸尿裤(S/M)，奶嘴，纸巾，湿巾，方巾，浴巾，袜子，安全提篮，婴儿理发器，婴儿监视器，
+安抚奶嘴，床铃，推车，安全围栏，吸奶器，乳头膏，温度计，沐浴露，洗发露，润肤露，
+奶粉，束缚带，冲洗器，脸盆，母乳保鲜袋，产后护肤品，抚触油，pp膏，睡袋，床单，月子服，乳头膏，...]
+暖风机   = 欧普JDSF113 459
+手机     = Redmi 9 799 
+摄像头   = 小米2K云 199
+投影仪   = 极米paly特别版 1699
+蓝牙耳机 = QCY T8 79
+
+
+2020年会抽奖地址
+http://wxwall2.appjx.cn:10080
+http://wxwall2.appjx.cn:10080/myadmin/index.php
+
+freeswitch: src/switch_channel.c:2088: switch_channel_get_state: Assertion `channel != ((void *)0)' failed.
+220.248.208.43:6650
+
+本周工作
+1.修改订单提交，防止按钮被重复点击
+2.下单写入log文件里面
+
+
+
+
+
+
+
+/**
+     * 下单：优惠金额分配到对应商品 分配不均暂时弃用 wansichao 2020-09-01
+     */
+    /*public function coupon_discount_false($orders_id){
+        $order = M('orders')->alias('a')->field('a.id,a.couponfee,count(a.id) as num')
+        ->join('LEFT JOIN hq_orders_goods as b on b.orders_id = a.id')
+        ->where(['a.id'=>$orders_id])->group('a.id')->select();
+        foreach ($order as $val) {
+            if (!($val['couponfee'] % $val['num'])) {
+                //能被整除就平分优惠金额
+                $updata['coupon_discount'] = round($val['couponfee']/$val['num'], 2);
+                M('orders_goods')->where('orders_id='.$orders_id)->data($updata)->save();
+            } else {
+                //不能被整除就平分取整，最后一个用总优惠减去被平均的金额
+                $items = M('orders_goods')->where('orders_id='.$orders_id)->field('id')->select();
+                for ($i=0; $i<count($items)-1; $i++) {
+                    $updata['coupon_discount'] = round(ceil($val['couponfee']/$val['num']),2);
+                    $sum_avg += ceil($val['couponfee']/$val['num']);
+                    M('orders_goods')->where('id='.$items[$i]['id'])->data($updata)->save();
+                }
+                $updata2['coupon_discount'] = round($val['couponfee']-$sum_avg, 2);
+                M('orders_goods')->where('id='.$items[$val['num']-1]['id'])->data($updata2)->save(); //最后一个
+            }
+        }
+        //再把总金额减去优惠价格
+        $lists = M('orders_goods')->where('orders_id='.$orders_id)->field('id,goods_price,coupon_discount')->select();
+        foreach ($lists as $val) {
+            $updata3['goods_price'] = $val['goods_price'] - $val['coupon_discount'];
+            M('orders_goods')->where('id='.$val['id'])->data($updata3)->save();
+        }
+    }*/
+
+//同步腾讯物流订单
+public function txapi(){ 
+        $list = M('kaidian_orders')->where(['status'=>1,'ec_type'=>2,'jos_status'=>4])->field('id,f_id,o_order_id,jos_orderid')->select();
+        foreach ($list as $val) {
+            $fy_closeorder = A('Fy')->closeorder($val['f_id'],$val['o_order_id']); 
+        }
+    }
+
+
+//找相差金额
+SELECT c.name, sum(a.ordercb) FROM `hq_kaidian_orders` as a
+LEFT JOIN hq_kaidian_products as b on b.id=a.product_id
+LEFT JOIN hq_kaidian_goods as c on c.id = b.good_id
+WHERE `send` = 1 
+AND `jos_orderid` <> '' 
+AND `jos_status` NOT IN ('4','-790','-650','2') 
+AND a.status = 1 
+AND `jos_dateline` BETWEEN 1596988800 AND 1597075199
+GROUP BY c.id
+ORDER BY c.name
+
+SELECT name, sum(money) FROM `hq_goods_mx` 
+WHERE `type` = 1 AND `status` = 1 AND `date` BETWEEN 1596988800 AND 1597075199 
+GROUP BY name
+ORDER BY name
+
+
+//在线支付--常规版本
+  pay1() {
+    //没有地址阻止提交订单
+    if(this.data.address.length==0){
+      wx.showToast({title:'您还未填写收货地址！', icon:'none', duration:1500})
+      return false;
+    }
+    var _this = this;
+    wx.request({
+      url: app.globalData.defaultURL + "/pay/index", //第一次调用api
+      data: {openid:wx.getStorageSync("wxOpenid")},
+      method:'post',
+      header: {'content-type': 'application/x-www-form-urlencoded'},
+      success:res=>{
+          //console.info("第一次，支付接口调用成功");
+          var paytype = 2;
+          var orders_id = _this.order(paytype);
+          var {payPrice} = _this.data;
+          orders_id.then(ordersid=>{
+            app.checkLogin()&&wx.request({
+              url: app.globalData.defaultURL + "/pay/index", //拿到orders_id后第二次调用api
+              data: {token:link.getCache("token"), orderid:ordersid},
+              method:'post',
+              header: {'content-type': 'application/x-www-form-urlencoded'},
+              success:res=>{
+                if(res.data.code==100){
+                  //console.info("第二次调用成功！");
+                  wx.requestPayment({ //第三次调用api支付
+                    'timeStamp': ""+res.data.paydata.timeStamp,
+                    'nonceStr': ""+res.data.paydata.nonceStr,
+                    'package': ""+res.data.paydata.package,
+                    'signType': ""+res.data.paydata.signType,
+                    'paySign': ""+res.data.paydata.paySign,
+                    'success':res=>{
+                      //console.info("付款成功！ == 支付状态回调时改，这里不改");
+                      wx.reLaunch({
+                        url: '/pages/paysuccess/paysuccess?payPrice='+payPrice+'&payType=2&orders_id='+ordersid,
+                      })
+                    },
+                    'fail':err=>{
+                      //支付失败跳转到待支付页面
+                      wx.reLaunch({
+                        url: '/pages/user/waitpay/waitpay',
+                      })
+                    },
+                  })
+                }else{
+                  wx.showToast({title: "不要重复支付"});
+                }
+              },
+              fail:err=>{
+                wx.showToast({title: err});
+              }
+            })
+          })
+      },
+      fail:err=>{
+        wx.showToast({title: err});
+      }
+    })
+  },
+
+//获取收货地址
+  getaddress() {
+    let _this = this;
+    wx.getStorage({
+      key: 'address',
+      success(res) {
+        _this.setData({
+          address: res.data,
+        });
+      },
+    })
+  },
+
+  //获取订单提交数据
+  getorderList() {
+    let _this = this;
+    let total = 0;
+    wx.getStorage({
+      key: 'carts',
+      success:res=>{
+        var list = res.data.filter(o=> o.selected==false);
+        for(let i=0; i<list.length; i++) {
+          total += list[i].num * list[i].price;
+        }
+        _this.setData({
+          orderList: list,
+          totalPrice: parseFloat(total.toFixed(2)),
+        });
+        _this.getPayPrice();
+      },
+    })
+  },
+
+//获取产品大分类方法
+    getGoodsClassify() {
+      var url = app.globalData.defaultURL + '/api/goodsClassifyLists';
+      link.ajax({
+        url: url
+      }, ({
+        data: res
+      }) => {
+        //console.log(res);
+        res[0].issel = true,
+        this.setData({
+          cate: res,
+          ready: true
+        });
+      })
+    },
+
+    //获取默认商品
+    getGoodsAction() {
+      var id = this.data.classify_id;
+      var url = app.globalData.defaultURL + '/api/goodsFlLists?classify_id='+id;
+      link.ajax({
+        url: url
+      }, ({
+        data: res
+      }) => {
+        this.setData({
+          catechild: res,
+          classify_id:1
+        });
+      })
+    },
+
+onLoad: function () {
+    //this.getUserId();
+    //this.getAddress();
+    //this.getCartLists();
+    //this.getCartLoseLists();
+  },
+
+//获取收货地址
+  getAddress(userId) {
+    var url = app.globalData.defaultURL + '/api/getAddress?userId='+userId;
+    link.ajax({
+      url: url
+    }, ({
+      data: res
+    }) => {
+      this.setData({
+        address: res,
+      });
+    })
+  },
+
+  //获取购物车数据
+  getCartLists(userId) {
+    var url = app.globalData.defaultURL + '/api/cartLists?userId='+userId;
+    link.ajax({
+      url: url
+    }, ({
+      data: res
+    }) => {
+      for(let i=0; i<res.length; i++) {
+        res[i].selected = true;
+      }
+      this.setData({
+        carts: res,
+        hasList: true,
+      });
+      wx.setStorageSync('carts', this.data.carts);
+    })
+  },
+  
+  //获取购物车失效数据
+  getCartLoseLists(userId) {
+    var url = app.globalData.defaultURL + '/api/cartLoseLists?userId='+userId;
+    link.ajax({
+      url: url
+    }, ({
+      data: res
+    }) => {
+      this.setData({
+        cartsLose: res,
+      });
+    })
+  },
+
+
+//编辑商品
+  editCart() {
+    this.setData({
+      edit: true,
+      selectAllStatus:true,
+    });
+    for(let i=0; i<this.data.carts.length; i++) {
+      var selected = 'carts['+i+'].selected';
+      this.setData({[selected]:true});
+    }
+  },
+  
+  //完成编辑商品
+  seditCart() {
+    this.setData({
+      edit: false,
+      selectAllStatus:true,
+    });
+    for(let i=0; i<this.data.carts.length; i++) {
+      var selected = 'carts['+i+'].selected';
+      this.setData({[selected]:true});
+    }
+  },
+
+
+//创建订单
+  order() {
+    let order = []; //订单
+    order.push({
+      user_id:21, //假设的userid
+      paytype:1, //货到付款类型为1
+      price:this.data.payPrice, //支付价格
+      address_id:parseInt(this.data.address.id), //收货地址id
+      isPay:1, //不知道是什么就默认为1吧
+    })
+    
+    const {orderList} = this.data;  
+    let goods = []; //下单产品
+    orderList.forEach(v=>goods.push({
+      goods_id:v.goods_id, //商品id
+      goods_num:v.num, //商品数量
+      goods_price:v.price, //商品价格
+      num:v.num, //商品数量2?
+      goods_sku_id:v.goods_sku_id, //规格id
+      cart_id:v.id, //购物车id
+      remark:v.remark, //商品备注
+    }))
+    const orderParams = {order,goods};
+    console.log(orderParams);
+  },
+		
+	
+
+	
+	
+
+
+
+
+
+
+table:user|key:username|field:concat(truename,' ',username)|condition:truename LIKE '%{$keyword}%' or username LIKE '%{$keyword}%'
+table:kaidian_products|key:id|field:concat(name,' ',title)
+
+安装mongodb
+wget http://pecl.php.net/get/mongodb-1.7.4.tgz
+tar -zxvf mongodb-1.7.4.tgz
+cd /mongodb-1.7.4
+/usr/local/php/bin/phpize
+./configure --with-php-config=/usr/local/php/bin/php-config
+make && make install
+
+安装libevent
+libevent-2.1.11-stable.tar.gz
+tar -xzf libevent-2.1.11-stable.tar.gz
+cd libevent-2.1.11-stable
+./configure -prefix=/usr/lib/libevent
+make
+make install
+
+安装memcached
+tar -zxvf memcached-1.6.5.tar.gz
+cd memcached-1.6.5.tar.gz
+./configure --prefix=/usr/local/memcached 
+make && make test 
+sudo make install 
+
+
+SELECT a_num_tel,COUNT(a_num_tel),CONCAT(ROUND(sum(longtime/60),0),'分钟') from erp_fs_log
+where addtime>1574006400 and addtime<1574092800
+and a_num_tel in (
+82208844,
+82207896
+)
+GROUP BY a_num_tel
+
+
+孙霞数据：
+SELECT a_num_tel, date_format(from_unixtime(addtime),'%Y-%m-%d %H') AS hours,COUNT(DISTINCT(b_num)) as count
+FROM erp_fs_log
+WHERE a_num_tel = '82217120'
+GROUP BY hours
+ORDER BY addtime
+
+SELECT * FROM erp_fs_phone as a
+left join (select newgateway from erp_fs_user) as b on a.depart= b.newgateway 
+where b.newgateway is NULL and a.depart not like '%_s%'
+
+
+explain SELECT a.phone,b.name from erp_fs_phone as a
+LEFT JOIN erp_fs_user as b on a.depart = b.newgateway
+where (a.depart like '%hb3%' or a.depart like '%hb2%' or a.depart like '%hb1%') and a.depart not like '%_s%' 
+
+
+SELECT b.name,c.title,b.is_6m from erp_user as a
+LEFT JOIN erp_fs_user as b on a.username=b.uid
+LEFT JOIN erp_hr_group as c on c.id=a.hr_group_id
+WHERE b.tell_a LIKE '%nchmc%' AND b.newgateway = 'hb' and b.name not like '%傲亚%'
+
+
+2.请假统计
+SELECT 
+a.uid,
+b.truename,
+#a.timefrom,
+FROM_UNIXTIME(a.timefrom, "%Y-%m-%d %H:%i:%s"),
+#a.timeto,
+FROM_UNIXTIME(a.timeto, "%Y-%m-%d %H:%i:%s"),
+sum(a.qjday) as count
+from erp_leaveceshi as a
+LEFT JOIN erp_user as b on b.username=a.uid
+WHERE a.status=1 AND type=1 and b.estate=1 and ((a.timefrom BETWEEN 1541001600 AND 1543593600) or (a.timeto BETWEEN 1541001600 AND 1543593600) or (timefrom<1541001600 and timeto>1543593600))
+GROUP BY a.uid  
+
+高级PHP程序员
+
+ 重点：
+ 除了基本的LNMP程序，还能够在某个方向或领域有深入学习。（纵深维度发展）
+
+ 目标：
+ 除了能够完成基本的PHP业务开发，还能够解决大部分深入复杂的技术问题，并且可以独立设计完成中大型的系统设计和开发工作；
+ 自己能够独立hold深入某个技术方向，在这块比较专业。（比如在MySQL、Nginx、PHP、Redis等等任一方向深入研究）
+
+1. Linux：
+
+ 除了第二阶段的能力，在Linux下面除了常规的操作和性能监控跟踪，还能够使用很多高级复杂的命令完成工作（watch/tcpdump/starce /ldd/ar等)；在shell脚本方面，已经能够编写比较复杂的shell脚本（超过500行）来协助完成很多包括备份、自动化处理、监控等工作的 shell；对awk/sed/perl 等应用已经如火纯青，能够随意操作控制处理文本统计分析各种复杂格式的数据；对Linux内部机制有一些了解， 对内核模块加载，启动错误处理等等有个基本的处理；同时对一些其他相关的东西也了解，比如NFS、磁盘管理等等；
+
+2. Nginx:
+
+ 在第二阶段的基础上面，已经能够把Nginx操作的很熟练，能够对Nginx进行更深入的运维工作，比如监控、性能优化，复杂问题处理等等；看个人兴趣， 更多方面可以考虑侧重在关于Nginx工作原理部分的深入学习，主要表现在阅读源码开始，比如具体的master/worker工作机制，Nginx内部 的事件处理，内存管理等等；同时可以学习Nginx扩展的开发，可以定制一些自己私有的扩展；同时可以对Nginx+Lua有一定程度的了解，看看是否可 以结合应用出更好模式；这个阶段的要求是对Nginx原理的深入理解，可以考虑成为Nginx方向的深入专业者。
+
+3. MySQL/MongoDB：
+
+ 在第二阶段的基础上面，在MySQL应用方面，除了之前的基本SQL优化，还能够在完成一些复杂操作，比如大批量数据的导入导出，线上大批量数据的更改表 结构或者增删索引字段等等高危操作；除了安装配置，已经能够处理更多复杂的MySQL的问题，比如各种问题的追查，主从同步延迟问题的解决、跨机房同步数 据方案、MySQL高可用架构等都有涉及了解；对MySQL应用层面，对MySQL的核心关键技术比较熟悉，比如事务机制（隔离级别、锁等）、对触发器、 分区等技术有一定了解和应用；对MySQL性能方面，有包括磁盘优化（SAS迁移到SSD）、服务器优化（内存、服务器本身配置）、除了二阶段的其他核心 性能优化选项（innodb_log_buffer_size/back_log/table_open_cache /thread_cache_size/innodb_lock_wait_timeout等）、连接池软件选择应用，对show * （show status/show profile）类的操作语句有深入了解，能够完成大部分的性能问题追查；MySQL备份技术的深入熟悉，包括灾备 还原、对Binlog的深入理解，冷热备份，多IDC备份等；在MySQL原理方面，有更多了解，比如对MySQL的工作机制开始阅读部分源码，比如对主 从同步（复制）技术的源码学习，或者对某个存储引擎（MyISAM/Innodb/TokuDB）等等的源码学习理解，如果条件允许，可以参考CSV引擎 开发自己简单的存储引擎来保存一些数据，增强对MySQL的理解；在这个过程，如果自己有兴趣，也可以考虑往DBA方向发展。MongoDB层面，可以考 虑比如说在写少读多的情况开始在线上应用MongoDB，或者是做一些线上的数据分析处理的操作，具体场景可以按照工作来，不过核心是要更好的深入理解 RMDBS和NoSQL的不同场景下面的应用，如果条件或者兴趣允许，可以开始深入学习一下MongoDB的工作机制。 
+
+4. Redis/Memcached：
+
+ 在第二阶段的基础上面，能够更深入的应用和学习。因为Memcached不是特别复杂，建议可以把源码进行阅读，特别是内存管理部分，方便深入理 解；Redis部分，可以多做一些复杂的数据结构的应用（zset来做排行榜排序操作/事务处理用来保证原子性在秒杀类场景应用之类的使用操作）；多涉及 aof等同步机制的学习应用，设计一个高可用的Redis应用架构和集群；建议可以深入的学习一下Redis的源码，把在第二阶段积累的知识都可以应用 上，特别可以阅读一下包括核心事件管理、内存管理、内部核心数据结构等充分学习了解一下。如果兴趣允许，可以成为一个Redis方面非常专业的使用者。
+
+5. PHP：
+
+ 作为基础核心技能，我们在第二阶段的基础上面，需要有更深入的学习和应用。从基本代码应用上面来说，能够解决在PHP开发中遇到95%的问题，了解大部分 PHP的技巧；对大部分的PHP框架能够迅速在一天内上手使用，并且了解各个主流PHP框架的优缺点，能够迅速方便项目开发中做技术选型；在配置方面，除 了常规第二阶段会的知识，会了解一些比较偏门的配置选项（php auto_prepend_file/auto_append_file），包括扩展中 的一些复杂高级配置和原理（比如memcached扩展配置中的memcache.hash_strategy、apc扩展配置中的 apc.mmap_file_mask/apc.slam_defense/apc.file_update_protection之类的）；对php的 工作机制比较了解，包括php-fpm工作机制（比如php-fpm在不同配置机器下面开启进程数量计算以及原理），对zend引擎有基本熟悉 （vm/gc/stream处理），阅读过基本的PHP内核源码（或者阅读过相关文章），对PHP内部机制的大部分核心数据结构（基础类型/Array /Object）实现有了解，对于核心基础结构（zval/hashtable/gc）有深入学习了解；能够进行基本的PHP扩展开发，了解一些扩展开发 的中高级知识（minit/rinit等），熟悉php跟apache/nginx不同的通信交互方式细节（mod_php/fastcgi）；除了开发 PHP扩展，可以考虑学习开发Zend扩展，从更底层去了解PHP。
+
+6. C/C++：
+
+ 在第二阶段基础上面，能够在C/C++语言方面有更深入的学习了解，能够完成中小型C/C++系统的开发工作；除了基本第二阶段的基础C/C++语法和数 据结构，也能够学习一些特殊数据结构（b-tree/rb-tree/skiplist/lsm-tree/trie-tree等）方便在特殊工作中需 求；在系统编程方面，熟悉多进程、多线程编程；多进程情况下面了解大部分多进程之间的通信方式，能够灵活选择通信方式（共享内存/信号量/管道等）；多线 程编程能够良好的解决锁冲突问题，并且能够进行多线程程序的开发调试工作；同时对网络编程比较熟悉，了解多进程模型/多线程模型/异步网络IO模型的差别 和选型，熟悉不同异步网络IO模型的原理和差异（select/poll/epoll/iocp等），并且熟悉常见的异步框架（ACE/ICE /libev/libevent/libuv/Boost.ASIO等）和使用，如果闲暇也可以看看一些国产自己开发的库（比如muduo）；同时能够设 计好的高并发程序架构（leader-follow/master-worker等）；了解大部分C/C++后端Server开发中的问题（内存管理、日 志打印、高并发、前后端通信协议、服务监控），知道各个后端服务RPC通信问题（struct/http/thirft/protobuf等）；能够更熟 络的使用GCC和GDB来开发编译调试程序，在线上程序core掉后能够迅速追查跟踪解决问题；通用模块开发方面，可以积累或者开发一些通用的工具或库 （比如异步网络框架、日志库、内存池、线程池等），不过开发后是否应用要谨慎，省的埋坑去追bug；
+
+7. 前端：
+
+ 深入了解HTTP协议（包括各个细致协议特殊协议代码和背后原因，比如302静态文件缓存了，502是nginx后面php挂了之类的）；除了之前的前端 方面的各种框架应用整合能力，前端方面的学习如果有兴趣可以更深入，表现形式是，可以自己开发一些类似jQuery的前端框架，或者开发一个富文本编辑器 之类的比较琐碎考验JavaScript功力；
+
+8. 其他领域语言学习：
+
+ 在基础的PHP/C/C++语言方面有基本积累，建议在当前阶段可以尝试学习不同的编程语言，看个人兴趣爱好，脚本类语言可以学学 Python /Ruby 之类的，函数式编程语言可以试试 Lisp/Haskell/Scala/Erlang 之类的，静态语言可以试试 Java /Golang，数据统计分析可以了解了解R语言，如果想换个视角做后端业务，可以试试 Node.js还有前面提到的跟Nginx结合的 Nginx_Lua等。学习不同的语言主要是提升自己的视野和解决问题手段的差异，比如会了解除了进程/线程，还有轻量级协程；比如在跨机器通信场景下 面，Erlang的解决方案简单的惊人；比如在不想选择C/C++的情况下，还有类似高效的Erlang/Golang可用等等；主要是提升视野。
+
+9. 其他专业方向学习：
+
+ 在本阶段里面，会除了基本的LNMP技能之外，会考虑一些其他领域知识的学习，这些都是可以的，看个人兴趣和长期的目标方向。目前情况能够选择的领域比较 多，比如、云计算（分布式存储、分布式计算、虚拟机等），机器学习（数据挖掘、模式识别等，应用到统计、个性化推荐），自然语言处理（中文分词等），搜索 引擎技术、图形图像、语音识别等等。除了这些高大上的，也有很多偏工程方面可以学习的地方，比如高性能系统、移动开发（Android/IOS）、计算机 安全、嵌入式系统、硬件等方向。
+
+10. 系统设计：
+
+ 系统设计在第二阶段的基础之上，能够应用掌握的经验技能，设计出比较复杂的中大型系统，能够解决大部分线上的各种复杂系统的问题，完成类似 
+ 浏览器 -> 
+ CDN -> 
+ 负载均衡 ->
+ 接入层 -> 
+ Nginx+PHP -> 
+ 业务缓存 -> 
+ 数据库 -> 
+ 各路复杂后端RPC交互（存储后端、逻辑后端、反作弊后端、外部服务） -> 
+ 更多后端 酱紫的复杂业务；能够支撑每天数千万到数 亿流量网站的正常开发维护工作。})
+
+
+
+
+
+
+
+
+
+
+
+
+

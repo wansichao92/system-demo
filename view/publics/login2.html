@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {include file='publics/head'}
+    {load href="__FRAME__/global/css/components.min.css"}
+    {load href="__FRAME__/pages/css/login-4.min.css"}
+    {load href="__CSS__/login.css"}
+</head>
+
+<body class="login">
+    <div class="logo">
+        <h3 class="form-title w_title">WSC-FRAME</h3>
+    </div>
+    <div class="contents">
+        <div class="portlet-body">
+            <div class="tab-content">
+                <div>
+                    <form class="login-form" action='/publics/login' method="post">
+                        <input id="key" type="hidden" name="codekey" value="" />
+                        <div class="form-group form-md-line-input has-success">
+                            <div class="input-icon right">
+                                <input type="text" class="form-control" name="username" placeholder="帐号" autocomplete='off'>
+                                <span class="help-block">请输入帐号...</span>
+                                <i class="icon-user"></i>
+                            </div>
+                        </div>
+                        <div class="form-group form-md-line-input has-success">
+                            <div class="input-icon right">
+                                <input type="text" class="form-control" name="password" placeholder="密码" autocomplete='off'>
+                                <span class="help-block">请输入密码...</span>
+                                <i class="icon-lock"></i>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn green-haze login_but"> 登 录 </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="copyright">
+        <span class="f_zi">© 2021 wsc92.cn 赣ICP备19008489号-1</span>
+    </div>
+    {include file='publics/script'}
+    {load href="__FRAME__/pages/scripts/login-4.min.js"}
+</body>
+
+</html>

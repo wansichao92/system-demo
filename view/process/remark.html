@@ -1,0 +1,30 @@
+<div class="portlet light bordered form-fit">
+    <div class="portlet-title">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+        <div class="caption">
+            <span class="caption-subject font-blue-hoki bold uppercase">{$ptitle}</span>
+        </div>
+    </div>
+    <div class="portlet-body form">
+        <form action="{$__URL__}/{$action}" method="post" id="pageform" class="form-horizontal form-bordered form-row-stripped pageForm">
+            <input type="hidden" name="id" value="{$id}">
+            <input type="hidden" value="{$process_id}" name="process_id">
+            <div class="form-body tabbable-line">
+                <div class="form-group col-md-12">
+                    <label class="control-label col-md-3">备注</label>
+                    <div class="col-md-8">
+                        <textarea name="auditvalue" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="form-actions">
+                <div class="row">
+                    <div class="col-md-offset-3 col-md-9">
+                        <button type="submit" class="btn green auditbtn" data-audit="{$writablefields.audit ?? ''}"><i class="fa fa-check"></i> 提交</button>
+                        <button type="button" class="btn default" data-dismiss="modal" aria-hidden="true">取消</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

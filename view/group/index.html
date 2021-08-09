@@ -1,0 +1,132 @@
+{extend name="base/base"}
+{block name="bodycontent"}
+<style type="text/css">
+    .w_bmxb {
+        color: #ccc;
+    }
+
+    .hidepid, .hidepath{
+        display: none;
+    }
+
+    .bm_xtb {
+        width: 20px;
+        height: 20px;
+        background: #999;
+    }
+
+    .bmsl, .bmxl {
+        cursor: pointer;
+    }
+</style>
+<div class="page-bar">
+    <ul class="page-breadcrumb">
+        <li>
+            <a href="/">首页</a>
+            <i class="fa fa-angle-right"></i>
+        </li>
+        <li>
+            <span>{$pageTitle ?? '标题'}</span>
+        </li>
+    </ul>
+</div>
+<h1 class="page-title">
+    {$pageTitle ?? '标题'}
+    <small>{$smallTitle}</small>
+</h1>
+<div class="row">
+    <div class="col-md-12 mt-15">
+        <div class="portlet light bordered">
+            <div class="portlet-body">
+                <div class="table-toolbar">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="btn-group">
+                                <a class="btn green sbold" href="{$__URL__}/add.html">
+                                    <i class="fa fa-plus"></i> 
+                                    新增部门
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="index-body" class="table-container">
+                    <table class="table table-striped table-hover table-bordered" id="sample_1">
+                        <thead>
+                            <tr>
+                                <th>编号</th>
+                                <th>部门名称</th>
+                                <th>部门等级</th>
+                                <th>部门人数</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {volist name="list" id="vo"}
+                                <tr class="tr" style="display:none">
+                                    <td>
+                                        <span id="id">{$vo.id}</span>
+                                        <span class="hidepid">{$vo.pid}</span>
+                                        <span class="hidepath">{$vo.path}</span>
+                                    </td>
+                                    <td class="bm_name">{$vo.name|raw}</td>
+                                    <td class="level">{$vo.level}级</td>
+                                    <td>{$vo.count}</td>
+                                    <td>{$vo.operation|raw}</td>
+                                </tr>
+                            {/volist}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{/block}
+{block name="inc"}
+{load href="__FRAME__/apps/css/inbox.min.css"}
+{load href="__FRAME__/pages/scripts/ui-bootbox.min.js"}
+{load href="__FRAME__/global/css/components.min.css"}
+{load href="__FRAME__/global/css/plugins.min.css"}
+<script>
+    var current_url = "{$__URL__}/index";
+    $(function () {
+        $(".level").each(function () {
+            var level = $(this).text();
+            if (level == '0级') {
+                $(this).parent("tr").show();
+            }
+        })
+
+        //折叠下拉
+        $(".bmxl").click(function () {
+            var class_name = $(this).attr("class");
+            if (class_name == 'bmxl') {
+                var id = $(this).parents(".tr").find("#id").text();
+                $(".hidepid").each(function () {
+                    var pid = $(this).text();
+                    if (id == pid) {
+                        $(this).parents(".tr").show();
+                    }
+                })
+                $(this).find("i").attr("class", "fa fa-caret-down");
+                $(this).attr("class", "bmsl");
+            } else {
+                var id = $(this).parents(".tr").find("#id").text();
+                $(".hidepath").each(function () {
+                    var pid = $(this).text();
+                    ids = ',' + id + ',';
+                    if (pid.indexOf(ids) != -1) {
+                        $(this).parents(".tr").hide();
+                        $(this).parents(".tr").find("i").attr("class", "fa fa-caret-right");
+                        $(this).parents(".tr").find(".bmsl").attr("class", "bmxl");
+
+                    }
+                })
+                $(this).find("i").attr("class", "fa fa-caret-right");
+                $(this).attr("class", "bmxl");
+            }
+        })
+    })
+</script>
+{/block}

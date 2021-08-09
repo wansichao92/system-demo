@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>{include file='publics/head'}</head>
+
+<body class="page-header-fixed page-sidebar-closed-hide-logo">
+    <div class="page-wrapper">
+        <!-- 头部 -->
+        {include file='publics/header'}
+        <div class="page-container">
+            <!-- 导航 -->
+            {include file='publics/sidebar'}
+            <!-- 主体 -->
+            <div class="page-content-wrapper">
+                <div class="page-content">
+                    {block name="bodycontent"}{/block}
+                </div>
+            </div>
+        </div>
+        <!-- 底部 -->
+        {include file='publics/footer'}
+    </div>
+    <!-- 引用js -->
+    {include file='publics/script'}
+    {block name="inc"}{/block}
+</body>
+
+</html>

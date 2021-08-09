@@ -1,0 +1,198 @@
+<extend name="Base/common" />
+<block name="body-content">
+  <style>
+    .xzbm {
+      cursor: pointer;
+    }
+
+    .sel {
+      position: relative;
+      cursor: pointer;
+    }
+
+    .gb {
+      position: absolute;
+      right: -50px;
+      ;
+      top: 15px;
+    }
+
+    .selbox {
+      width: 400px;
+      padding: 10px;
+      margin-left: 2px;
+      height: 300px;
+      background: #FFF;
+      border: #CCC 1px solid;
+      position: absolute;
+      left: 13px;
+      top: 50px !important;
+      overflow-y: auto;
+      z-index: 999;
+      display: none;
+    }
+
+    .modal-footer {
+      text-align: left;
+    }
+  </style>
+  <h1 class="page-title">新增部门
+    <small>
+      <include file="Public/helpa" /></small>
+  </h1>
+  <div class="page-bar">
+    <ul class="page-breadcrumb">
+      <li>
+        <a href="index.html">首页</a>
+        <i class="fa fa-angle-right"></i>
+      </li>
+      <li>
+        <span>新增部门</span>
+      </li>
+    </ul>
+  </div>
+  <div class="portlet light bordered form-fit">
+    <div class="portlet-title">
+      <div class="caption">
+        <i class="icon-user font-blue-hoki"></i>
+        <span class="caption-subject font-blue-hoki bold uppercase">新增部门</span>
+        <span class="caption-helper"></span>
+      </div>
+    </div>
+    <div class="portlet-body form">
+      <form action="__CONTROLLER__/add" class="form-horizontal form-bordered form-row-stripped pageForm" method="post" style="padding-top:15px;">
+        <div class="form-group">
+          <label class="control-label col-md-3" for="inputError">部门名称：</label>
+          <div class="col-md-8">
+            <input type="text" class="form-control" id="inputError" name="title" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="control-label col-md-3" for="inputSuccess">父级部门：</label>
+          <div class="col-md-8">
+            <input type="hidden" class="pid" name="pid" />
+            <input type="text" class="form-control sel" value="请选择部门" readonly />
+            <div class="btn default gb">关闭</div>
+            <div class="selbox">
+              <div class="portlet-body">
+                <div class="tree_4 tree-demo"> </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-offset-3 col-md-9">
+          <button type="submit" class="btn green"><i class="fa fa-check"></i> 提交</button>
+          <button type="button" class="btn default" onclick="history.back();">返回</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    let dep_url            = "/Publics/getDepList";
+let dep_meid           = "/Publics/getGroupMe";
+let $search_tree_input = $('.search-tree-input');
+let $search_tree_id    = $('.search-tree-id');
+let $search_tree_box   = $('.search-tree-box');
+let $tree              = $('.tree_4');
+let meid               = $search_tree_input.attr("data_id");
+
+if (meid && meid!='' && meid!='undefined') {
+    $.ajax({
+        url: dep_url,
+        type: 'POST',
+        data: {"meid": meid},
+        success: function (data) {
+            if ($.isArray(data)) {
+                console.log(data);
+                arr = data.split('&');
+                $search_tree_input.attr("data_pid", arr[0]);
+                $search_tree_input.html(arr[1]);
+            }
+        }
+    })
+}
+
+//部门筛选项
+$(document).on('click', '.search-tree-input', function (e) { 
+    $search_tree_box.show();
+})
+
+//点击关闭隐藏
+$(document).on('click', '.search-tree-close', function (e) { 
+    $search_tree_box.hide();
+})
+
+//选中后
+$(document).on('click', '.search-tree-box .jstree-anchor', function (e) { 
+    //下拉框隐藏
+    $search_tree_box.hide(); 
+    //当前选中的文本
+    let selectText = $(this).text();   
+    let selectId   = $(this).parent().attr('id');
+    $search_tree_id.val(selectId);
+    $search_tree_input.val(selectText).html(selectText);
+})
+
+$(document).one('click', '.search-tree-input', function () {
+    //获取id和pid
+    let me  = $search_tree_input.attr("data_id");
+    let pid = $search_tree_input.attr("data_pid");
+    
+    //把pid父节点做为数组变量
+    if ("undefined"!=typeof pid) {
+        arr = pid.split(',');
+        let count = arr.length - 2;
+        //依次找到父节点并且展开
+        $('#'+arr[2]).children("i").trigger('click');
+        setTimeout(function () { $('#'+arr[3]).children("i").trigger('click'); }, 800);
+        setTimeout(function () { $('#'+arr[4]).children("i").trigger('click'); }, 1600);
+        setTimeout(function () { $('#'+arr[5]).children("i").trigger('click'); }, 2400);
+        setTimeout(function () { $('#'+arr[6]).children("i").trigger('click'); }, 3200);
+        setTimeout(function () { $('#'+arr[7]).children("i").trigger('click'); }, 4000);
+        //找到自己的id,标记为选中状态
+        setTimeout(function () { $('#'+me).children("a").addClass("jstree-clicked"); }, ((count - 1) * 800));
+    }
+})
+let ajaxTreeSample = function () {
+    $tree.jstree({
+        "core": {
+            "themes": { "responsive": true },
+            "check_callback": true,
+            "animation": 0,
+            'data': {
+                'url': function (node) {
+                    return dep_url;
+                },
+                'data': function (node) {
+                    return { 'parent': node.id };
+                }
+            }
+        },
+        "types": {
+            "#": { "max_children": 1, "max_depth": 4, "valid_children": ["root"] },
+            "default": { "valid_children": ["default", "file"] },
+        },
+        "state": { "key": "demo3" },
+        "plugins": ["dnd", "contextmenu"]
+    });
+}()
+
+    </script> 
+</block>
+
+<block name="script">
+  <link href="__PUBLIC__/Metronic/apps/css/inbox.min.css" rel="stylesheet" type="text/css" />
+  <script src="__PUBLIC__/Metronic/pages/scripts/ui-bootbox.min.js" type="text/javascript"></script>
+  <script src="__PUBLIC__/Metronic/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
+  <link href="__PUBLIC__/Metronic/global/plugins/jstree/dist/themes/default/style.min.css" rel="stylesheet" type="text/css" />
+  <link href="__PUBLIC__/Metronic/global/plugins/datatables/datatables.min.css" rel="stylesheet" type="text/css" />
+  <link href="__PUBLIC__/Metronic/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css" rel="stylesheet" type="text/css" />
+  <link href="__PUBLIC__/Metronic/global/css/components.min.css" rel="stylesheet" id="style_components" type="text/css" />
+  <link href="__PUBLIC__/Metronic/global/css/plugins.min.css" rel="stylesheet" type="text/css" />
+  <script src="__PUBLIC__/Metronic/global/scripts/datatable.js" type="text/javascript"></script>
+  <script src="__PUBLIC__/Metronic/global/plugins/datatables/datatables.min.js" type="text/javascript"></script>
+  <script src="__PUBLIC__/Metronic/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+  <link href="__PUBLIC__/Metronic/global/plugins/select2/css/select2.min.css" rel="stylesheet" type="text/css">
+  <link href="__PUBLIC__/Metronic/global/plugins/select2/css/select2-bootstrap.min.css" rel="stylesheet" type="text/css" />
+  <script src="__PUBLIC__/Metronic/global/plugins/select2/js/select2.full.min.js" type="text/javascript"></script>
+</block>

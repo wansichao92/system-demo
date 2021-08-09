@@ -1,0 +1,41 @@
+<div class="portlet light bordered form-fit">
+    <div class="portlet-title">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+        <div class="caption">
+            <i class="icon-user font-blue-hoki"></i>
+            <span class="caption-subject font-blue-hoki bold uppercase">{$smallTitle ?? $pageTitle}</span>
+            <span class="caption-helper"></span>
+        </div>
+    </div>
+</div>
+<form action="/menu/add" class="form-horizontal form-bordered form-row-stripped pageForm" method="post" id="add_from">
+    <div class="form-group">
+        <label class="control-label col-md-3" for="inputSuccess">名称</label>
+        <div class="col-md-7">
+            <input type="text" name="name" class="form-control" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-md-3" for="inputSuccess">路径</label>
+        <div class="col-md-7">
+            <input type="text" name="link" class="form-control" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-md-3" for="inputSuccess">图标</label>
+        <div class="col-md-7">
+            <input type="text" name="icon" class="form-control" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-md-3" for="inputSuccess">排序</label>
+        <div class="col-md-7">
+            <input type="text" name="sort" class="form-control" />
+        </div>
+    </div>
+    
+    <div class="modal-footer">
+        <button type="submit" class="btn green">添加</button>
+        <a class="btn default w_cancel">放弃</a>
+    </div>
+</form>

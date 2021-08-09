@@ -1,0 +1,110 @@
+<extend name="Base/common"/>
+<block name="body-content">
+<!-- BEGIN PAGE TITLE-->
+  
+  <h1 class="page-title">部门修改
+    <small><include file="Public/helpa"/></small>
+  </h1>
+ <div class="response none"></div> 
+  <!-- END PAGE TITLE-->
+  <div class="page-bar">
+    <ul class="page-breadcrumb">
+      <li> <a href="index.html">首页</a> <i class="fa fa-angle-right"></i> </li>
+      <li> <span>部门修改</span> </li>
+    </ul>
+  </div>
+  <!-- END PAGE HEADER-->
+  <div class="inbox">
+    <div class="row">
+      <div class="col-md-12"> 
+        
+        <!-- BEGIN FORM-->
+        <form action="__CONTROLLER__/edit" class="form-horizontal form-bordered form-row-stripped pageForm" method="post" style="padding-top:15px; display:">
+          <input type="hidden" class="form-control post_pid" id="post_pid" name="pid" value="{$pid}" />
+          <input type="hidden" class="form-control post_id" id="post_id" name="id" value="{$id}" />
+          <div class="form-group">
+            <label class="control-label col-md-2" for="inputError">部门名称：</label>
+            <div class="col-md-3">
+              <input type="text" class="form-control title" name="title" value="{$id_n}"/>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-md-2" for="inputSuccess">父级部门：</label>
+            <!--hidden-->
+              <div class="col-md-3">
+              <input type="text" class="form-control sel" value="{$pid_n}" readonly/>
+              <div class="btn default gb">关闭</div>
+              <div class="selbox">
+                <div class="portlet-body">
+                  <div class="tree_4 tree-demo"> </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn blue">修改</button>
+            <a class="btn default" onclick="history.back();">放弃</a>
+          </div>
+        </form>
+        
+    <!-- END CONTENT --> 
+  </div>
+  <!-- END CONTAINER -->
+  
+  </div>
+<script>
+$(function(){
+  //部门筛选项
+  $(document).on('click', '.sel', function(e) {
+    $(".selbox2").show(); 
+  })
+  //点击关闭隐藏
+  $(document).on('click', '.gb', function(e) {
+    $(".selbox2").hide();
+  })
+
+  //选中后
+  $(document).on('click', '.selbox .jstree-anchor', function(e) {
+    $(".selbox").hide(); //下拉框隐藏
+    var text = $(this).text(); //当前选中的文本
+    var pid = $(this).parent().attr('id');
+    if(pid&&text){
+      $("#post_pid").val(pid);
+      $(".selbmid").val(pid);
+      $(".sel2").val(text); 
+    }
+  })  
+})
+var current_urls="__URL__/tree";
+</script>
+<style>
+.modal-content,.popover{background-clip:none !important;}
+.modal-content{ border:0px solid rgba(0, 0, 0, 0.2)}
+.modal-header_box{ background:#FFF; padding:15px; border-bottom:1px solid #FFF; }
+.bmbj{ float:right;}
+.xzbm{ cursor:pointer;}
+.sel{ position:relative; cursor: pointer;}
+.sel,.sel2{ position:relative;}
+.gb,.gb2{ position:absolute; right:-50px;; top:0px;}
+.selbox,.selbox2{ width:400px; padding:10px;  margin-left:2px; height:300px; background:#FFF; border:#CCC 1px solid; position:absolute; left:13px; top:37px !important; overflow-y:auto; z-index:999; display:none;}
+.modal-footer{ text-align:left;}
+</style>
+</block>
+<!--<include file="Public/index_script.html"/>-->
+<block name="script">
+  <link href="__PUBLIC__/Metronic/apps/css/inbox.min.css" rel="stylesheet" type="text/css" />
+  <script src="__PUBLIC__/Metronic/pages/scripts/ui-bootbox.min.js" type="text/javascript"></script>
+  <script src="__PUBLIC__/Metronic/wan.js?v=1" type="text/javascript"></script>
+  <!--tree-->
+  <script src="__PUBLIC__/Metronic/global/plugins/jstree/dist/jstree.min.js" type="text/javascript"></script>
+  <link href="__PUBLIC__/Metronic/global/plugins/jstree/dist/themes/default/style.min.css" rel="stylesheet" type="text/css" />
+  
+  <!--公共js-->
+  <link href="__PUBLIC__/Metronic/global/plugins/datatables/datatables.min.css" rel="stylesheet" type="text/css" />
+  <link href="__PUBLIC__/Metronic/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css" rel="stylesheet" type="text/css" />
+  <link href="__PUBLIC__/Metronic/global/css/components.min.css" rel="stylesheet" id="style_components" type="text/css" />
+  <link href="__PUBLIC__/Metronic/global/css/plugins.min.css" rel="stylesheet" type="text/css" />
+  <script src="__PUBLIC__/Metronic/global/scripts/datatable.js" type="text/javascript"></script>
+  <script src="__PUBLIC__/Metronic/global/plugins/datatables/datatables.min.js" type="text/javascript"></script>
+  <script src="__PUBLIC__/Metronic/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js" type="text/javascript"></script>
+</block>

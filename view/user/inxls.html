@@ -1,0 +1,64 @@
+{extend name="base/base"}
+{block name="bodycontent"}
+    <div class="page-bar">
+        <ul class="page-breadcrumb">
+            <li>
+                <a href="index.html">首页</a>
+                <i class="fa fa-angle-right"></i>
+            </li>
+            <li>
+                <span>{$pageTitle ?? '标题'}-数据导入</span>
+            </li>
+        </ul>
+    </div>
+    <h1 class="page-title">
+        {$pageTitle ?? '标题'}
+        <small>{$smallTitle}</small>
+    </h1>
+    <div class="portlet light form-fit bordered">
+        <div class="portlet-title">
+            <div class="caption">
+                <i class="icon-settings font-dark"></i>
+                <span class="caption-subject font-dark sbold uppercase">数据导入</span>
+            </div>
+        </div>
+        <div class="portlet-body form">
+            <form action="/user/inxls" method="post" id="pageform" class="form-horizontal form-bordered form-row-stripped pageForm">
+                <div class="form-body">
+                    <div class="form-group">
+                        <label class="control-label col-md-3">导入模版</label>
+                        <div class="col-md-4">
+                            <a href="/moban/user.xlsx" download="user.xlsx" class="btn blue-hoki"><i class="fa fa-download"></i> 模版表格下载</a>
+                            <span class="help-block"></span>
+                        </div>
+                    </div>
+                    <div class="form-group last">
+                        <label class="control-label col-md-3">表格导入</label>
+                        <div class="col-md-4">
+                            <input id="fileinput" name="fileinput" data-show-preview="false" type="file" />
+                            <input type="hidden" name="filename_url" value=""/>
+                            <div class="upload-img-box"></div>
+                            <span class="help-block"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <div class="row">
+                        <div class="col-md-offset-3 col-md-9">
+                            <button type="submit" class="btn green"><i class="fa fa-check"></i> 导入</button>
+                            <button type="button" class="btn default" onclick="history.back();">返回</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{/block}
+{block name="inc"}
+    {load href="__FRAME__/global/plugins/select2/css/select2.min.css"} 
+    {load href="__FRAME__/global/plugins/select2/css/select2-bootstrap.min.css"} 
+    {load href="__FRAME__/global/plugins/select2/js/select2.full.min.js"} 
+    {load href="__FRAME__/global/css/components.min.css"} 
+    {load href="__JS__/public.js"}
+    {load href="__JS__/fileinputset.js"}
+{/block}

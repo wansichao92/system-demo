@@ -1,0 +1,98 @@
+{extend name="base/base"}
+{block name="bodycontent"}
+<div class="page-bar">
+    <ul class="page-breadcrumb">
+        <li>
+            <a href="/">首页</a>
+            <i class="fa fa-angle-right"></i>
+        </li>
+        <li>
+            <span>{$pageTitle ?? '标题'}</span>
+        </li>
+    </ul>
+</div>
+<h1 class="page-title">
+    {$pageTitle ?? '标题'}
+    <small>{$smallTitle ?? ''}</small>
+</h1>
+
+<div class="portlet light form-fit bordered">
+    <div class="portlet-title">
+        <div class="caption">
+            <span class="caption-subject font-dark sbold uppercase">添加数据</span>
+        </div>
+    </div>
+    <div class="portlet-body form">
+        <form action="{$__URL__}/add" method="post" id="pageform" class="form-horizontal form-bordered form-row-stripped pageForm">
+            <div class="form-body">
+                {volist name="fields" id="field"}
+                    {if condition="$field['isshow'] eq 1 || $field['isshow'] eq 2"}
+                        {if condition="$field['type'] eq 'model'"}
+                            {include file="process/attribute_repeater_edit"}
+                        {else /}
+                            {include file="process/attribute"}
+                        {/if}
+                    {/if}
+                {/volist}
+            </div>
+            <div class="form-actions">
+                <div class="row">
+                    <div class="col-md-offset-3 col-md-9">
+                        <button type="submit" class="btn green"><i class="fa fa-check"></i> 提交</button>
+                        <button type="button" class="btn default" onclick="history.back();">返回</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{/block}
+
+{block name="inc"}
+    <script>
+        var web_url = "__APP__";
+        $(function () {
+            handleValidation1();
+            $(".datetime-picker").datetimepicker({
+                isRTL: App.isRTL(),
+                format: "yyyy-mm-dd hh:ii",
+                autoclose: true,
+                todayBtn: true,
+                pickerPosition: (App.isRTL() ? "bottom-right" : "bottom-left"),
+                minuteStep: 10
+            });
+            linkage();
+            //隐藏元素内的INPUT都不作必填验证
+            $('.pageForm').find('div:hidden').each(function () {
+                $(this).find('input').addClass("ignore");
+            });
+        });
+    </script>
+	{load href="__FRAME__/global/plugins/select2/css/select2.min.css"} 
+    {load href="__FRAME__/global/plugins/select2/css/select2-bootstrap.min.css"} 
+    {load href="__FRAME__/global/plugins/select2/js/select2.full.min.js"} 
+    {load href="__FRAME__/global/plugins/jquery-repeater/jquery.repeater.js"}
+    {load href="__FRAME__/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css"}
+    {load href="__FRAME__/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.css"}
+    {load href="__FRAME__/global/plugins/bootstrap-markdown/css/bootstrap-markdown.min.css"}
+    {load href="__FRAME__/global/plugins/jquery-validation/js/jquery.validate.min.js"}
+    {load href="__FRAME__/global/plugins/jquery-validation/js/additional-methods.min.js"}
+    {load href="__FRAME__/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js"}
+    {load href="__FRAME__/global/plugins/bootstrap-wysihtml5/wysihtml5-0.3.0.js"}
+    {load href="__FRAME__/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.js"}
+    {load href="__FRAME__/global/plugins/ckeditor/ckeditor.js"}
+    {load href="__FRAME__/global/plugins/bootstrap-markdown/lib/markdown.js"}
+    {load href="__FRAME__/global/plugins/bootstrap-markdown/js/bootstrap-markdown.js"}
+    {load href="__FRAME__/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css"}
+    {load href="__FRAME__/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"}
+    {load href="__FRAME__/apps/css/inbox.min.css"} 
+    {load href="__FRAME__/pages/scripts/ui-bootbox.min.js"}
+	{load href="__FRAME__/global/css/plugins.min.css"}
+    {load href="__FRAME__/global/plugins/datatables/datatables.min.css"} 
+    {load href="__FRAME__/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.css"}
+    {load href="__FRAME__/global/scripts/datatable.js"} 
+    {load href="__FRAME__/global/plugins/datatables/datatables.min.js"} 
+    {load href="__FRAME__/global/plugins/datatables/plugins/bootstrap/datatables.bootstrap.js"}
+    {load href="__FRAME__/global/css/components.min.css"} 
+    {load href="__JS__/public.js"}
+{/block}

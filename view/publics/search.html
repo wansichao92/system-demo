@@ -1,0 +1,205 @@
+<style>
+    .select2-container--default {
+        display: block !important;
+    }
+</style>
+<form action="{$__URL__}" id="myform" class="form-horizontal form-bordered form-row-stripped searchForm">
+    <div class="form-body">
+        {volist name="search_list" id="searchs"}
+            <div class="form-group col-md-6">
+                <label class="control-label col-md-3">{$searchs.title}</label>
+                <div class="col-md-9">
+                    {if condition="array_key_exists($searchs['name'], $fields) eq true"}
+                        {php}
+                            $field = $fields[$searchs['name']];
+                        {/php}
+                    {else /}
+                        {php}
+                            $field = $searchs;
+                        {/php}
+                    {/if}
+                    {php}
+                        $field['name'] = $searchs['src_name'] ?? $field['name'];
+                        $field['type'] = $field['type'] ?? '';
+                        $searchData[$field['name']] = $searchData[$field['name']] ?? '';
+                    {/php}
+                    {switch name="field.type"}
+                        {case value="table"}
+                            <select name="{$field.name}" class="form-control select2me" {$disabled ?? ''}>
+                                <option></option>
+                                {volist name=":parse_table_field($field['extra'])" id="vo"}
+                                <option value="{$key}" {eq name="searchData[$field['name']]" value=" $key ?? null "}selected{/eq}>{$vo}</option>
+                                {/volist}
+                            </select>
+                        {/case}
+                        {case value="function"}
+                            <select name="{$field.name}" class="form-control select2me {eq name="field.ismust" value="1"}required{/eq}" {$disabled}>
+                                <option></option>
+                                {volist name=":parse_function_field($field['execute'],$data)" id="vo"}
+                                    <option value="{$key}" {eq name="data[$field['name']]" value=" $key ?? null "}selected{/eq}>{$vo}</option>
+                                {/volist}
+                            </select>
+                        {/case}
+                        {case value="select"}
+                            <select class="form-control select2me" name="{$field.name}" {notempty name="field.is_multiple"}multiple="multiple" placeholder="aaa"{/notempty} {$disabled ?? ''}>
+                                <option></option>
+                                {volist name=":parse_field_attr($field['extra'])" id="vo"}
+                                    {php}
+                                        $s_selected = "";
+                                        if ($field['is_multiple']) {
+                                            $s_selected = in_array($key, $searchData[$field['name']]) ? 'selected' : '';
+                                        } else {
+                                            $s_selected = $key==$searchData[$field['name']] ? 'selected' : '';
+                                        }
+                                    {/php}
+                                    <option value="{$key}" {$s_selected}>{$vo}</option>
+                                {/volist}
+                            </select>
+                        {/case}
+                        {case value="linktable"}
+                            <select data-extra="{:handleSearchExtra($field['extra'])}" class="form-control js-data-example-ajax" name="{$field.name}">
+                                {php}
+                                    $key = $searchData[$field['name']];
+                                    if ($key) {
+                                        $value = linktableValue($key, $field['extra']);
+                                        echo '<option value="'.$key.'" selected="selected">'.$value.'</option>';
+                                    }
+                                {/php}
+                            </select>
+                        {/case}
+                        {case value="radio"}
+                            <div class="mt-radio-inline">
+                                {volist name=":parse_field_attr($field['extra'])" id="vo"}
+                                    <label class="mt-radio">
+                                        <input {$disabled} type="radio" name="{$field.name}" value="{$key}" 
+                                        {notempty name="data[$field['name']]"}
+                                            {eq name="data[$field['name']]" value=" $key ?? null "}checked="checked"{/eq}
+                                        {else /}
+                                            {eq name="field.value" value=" $key ?? null "}checked{/eq}
+                                        {/notempty}> {$vo}
+                                        <span></span>
+                                    </label>
+                                {/volist}
+                            </div>
+                        {/case}
+                        {case value="checkbox"}
+                            <div class="mt-checkbox-inline">
+                                {volist name=":parse_field_attr($field['extra'])" id="vo"}
+                                    <label class="mt-checkbox">
+                                        <input {$disabled ?? ''} type="checkbox" value="{$key}" name="{$field.name}[]" {if condition="check_document_position($data[$field['name']],$key)"}checked="checked"{/if} >
+                                        {$vo}
+                                        <span></span>
+                                    </label>
+                                {/volist}
+                            </div>
+                        {/case}
+                        {case value="textarea"}
+                            <textarea name="{$field.name}" class="form-control" rows="3" {$disabled ?? ''}>{$data[$field['name']]}</textarea>
+                        {/case}
+                        {case value="datetime"}
+                            <div class="input-group rang{$field.name}">
+                                <input name="{$field.name}" type="text" value="{php}echo $searchData[$field['name']] ?? '';{/php}" class="form-control">
+                                <span class="input-group-btn">
+                                    <button class="btn default date-range-toggle" type="button">
+                                        <i class="fa fa-calendar"></i>
+                                    </button>
+                                </span>
+                            </div>
+                            <script>
+                                $(function () {
+                                    $(".rang{$field['name']}").daterangepicker(
+                                        {
+                                            opens: (App.isRTL() ? 'left' : 'right'),
+                                            format: 'YYYY/MM/DD',
+                                            ranges: {
+                                                '今日': [moment(), moment()],
+                                                '昨日': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                                                '本月': [moment().startOf('month'), moment().endOf('month')],
+                                                '上月': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                                            },
+                                            startDate: moment().subtract(29, 'days'),
+                                            endDate: moment()
+                                        },
+                                        function (start, end) {
+                                            $(".rang{$field['name']} input").val(start.format('YYYY-M-D') + ' - ' + end.format('YYYY-M-D'));
+                                        }
+                                    );
+                                });
+                            </script>
+                        {/case}
+                        {case value="date"}
+                            <div class="input-group defaultranges{$field.name}">
+                                <input name="{$field.name}" type="text" value="{php}echo $searchData[$field['name']] ?? '';{/php}" class="form-control">
+                                <span class="input-group-btn">
+                                    <button class="btn default date-range-toggle" type="button">
+                                        <i class="fa fa-calendar"></i>
+                                    </button>
+                                </span>
+                            </div>
+                            <script>
+                                $(function () {
+                                    $(".defaultranges{$field['name']}").daterangepicker(
+                                        {
+                                            opens: (App.isRTL() ? 'left' : 'right'),
+                                            format: 'YYYY/MM/DD',
+                                            ranges: {
+                                                '今日': [moment(), moment()],
+                                                '昨日': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                                                '本月': [moment().startOf('month'), moment().endOf('month')],
+                                                '上月': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                                            },
+                                            startDate: moment().subtract(29, 'days'),
+                                            endDate: moment()
+                                        },
+                                        function (start, end) {
+                                            $(".defaultranges{$field['name']} input").val(start.format('YYYY-M-D') + ' - ' + end.format('YYYY-M-D'));
+                                        }
+                                    );
+
+                                });
+                            </script>
+                        {/case}
+                        {case value="daterange"}
+                            <div class="input-group input-large date-picker input-daterange" data-date="2017-1-1" data-date-format="yyyy-mm-dd">
+                                <input type="text" class="form-control" name="timefrom" value="{notempty name="data.timefrom"} $data['timefrom']|date='Y-m-d',### {/notempty}" {$disabled ?? ''}>
+                                <span class="input-group-addon"> 到 </span>
+                                <input type="text" class="form-control" name="timeto" value="{notempty name="data.timeto"} $data['timeto']|date='Y-m-d',### {/notempty}" {$disabled ?? ''}> 
+                            </div>
+                        {/case}
+                        {case value="section"}
+                            <input type="text" class="form-control search-tree-input" value="请选择部门筛选" placeholder="请选择部门筛选" readonly />
+                            <input name="hr_group_id" type="hidden" class="form-control search-tree-id" />
+                            <span class="input-group-btn">
+                                <button class="btn default date-range-toggle search-tree-close" type="button">
+                                    <i class="fa fa-close"></i>
+                                </button>
+                            </span>
+                            <div class="response none"></div>
+                            <div class="search-tree-box">
+                                <div class="portlet-body">
+                                    <div class="tree_4 tree-demo"></div>
+                                </div>
+                            </div>
+                        {/case}
+                        {default /}
+                        <input type="text" placeholder="" name="{$field.name}" class="form-control" value="{php}echo $searchData[$field['name']] ?? '';{/php}" {$disabled ?? ''} />
+                    {/switch}
+                </div>
+            </div>
+        {/volist}
+        {if condition="isset($process_id)"}
+            {include file="process/extra_search"}
+        {/if}
+    </div>
+    <div class="form-actions">
+        <div class="row">
+            <div class="col-md-offset-5 col-md-7">
+                <button type="reset" class="btn default">清空查询</button>
+                <button type="submit" class="btn green">
+                    <i class="fa fa-check"></i> 
+                    搜索
+                </button>
+            </div>
+        </div>
+    </div>
+</form>

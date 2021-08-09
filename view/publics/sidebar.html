@@ -1,0 +1,211 @@
+<div class="page-sidebar-wrapper">
+    <div class="page-sidebar navbar-collapse collapse">
+        <ul class="page-sidebar-menu  page-header-fixed" data-keep-expanded="false" data-auto-scroll="true" data-slide-speed="200" style="padding-top: 20px">
+            <li class="sidebar-toggler-wrapper hide">
+                <div class="sidebar-toggler">
+                    <span></span>
+                </div>
+            </li>
+
+            <!-- 站内搜索 -->
+            <li class="sidebar-search-wrapper">
+                <form class="sidebar-search" action="/Search/index.html" method="POST">
+                    <a href="javascript:;" class="remove">
+                        <i class="icon-close"></i>
+                    </a>
+                    <div class="input-group">
+                        <input type="text" name="key" class="form-control web-search" autocomplete="off" placeholder="站内关键词搜索...">
+                        <span class="input-group-btn">
+                            <a href="javascript:;" class="btn submit">
+                                <i class="icon-magnifier"></i>
+                            </a>
+                        </span>
+                    </div>
+                </form>
+            </li>
+
+            <!-- 首页菜单 -->
+            {php}
+                $path = strtolower(app('request')->controller()."/".app('request')->action());
+                $control = strtolower(app('request')->controller());
+            {/php}
+            <li class="nav-item start {eq name="path" value="index/index"}active{/eq}">
+                <a href="/index.php" class="nav-link">
+                    <i class="icon-home"></i>
+                    <span class="title">首页</span>
+                    {eq name="path" value="index/index"}
+                        <span class="selected"></span>
+                    {/eq}
+                </a>
+            </li>
+
+            <!-- 普通模块菜单 -->
+            {php} 
+                $cate = think\facade\Db::name('menu')->where(['level'=>0,'status'=>1,'process_id'=>0])->order('sort')->select()->toArray();
+            {/php}
+            {foreach name="cate" item="c"}
+                {empty name="c.link"}
+                    <li class="heading">
+                        <h3 class="uppercase">{$c.name}</h3>
+                    </li>
+                    {php}continue;{/php}
+                {/empty}
+                {if condition="authcheck($c['link'], session('uid'))"}
+                    {php} 
+                        $cate1 = think\facade\Db::name('menu')->where('process_id=0 and level=1 and status=1 and pid='.$c['id'])->order('sort')->select()->toArray();
+                    {/php}
+                    {empty name="cate1"}
+                        {php}
+                            $v_link = explode("/",$c['link']);
+                            $v_link = strtolower($v_link[0]);
+                        {/php}
+                        <li class="nav-item {if condition="($c['link'] eq $path) OR ($v_link eq $control)"}active{/if}">
+                            <a href="/{$c['link']}.html" class="nav-link">
+                                <i class="{php}echo $c['icon'] ?? 'icon-folder';{/php}"></i>
+                                <span class="title">{$c.name}</span>
+                                {if condition="($c['link'] eq $path) OR ($v_link eq $control)"}
+                                    <span class="selected"></span>
+                                {/if}
+                            </a>
+                        </li>
+                    {else /}
+                        <li class="nav-item {if condition="($c['link'] eq $path)"}active open{/if}">
+                            <a href="javascript:;" class="nav-link nav-toggle">
+                                <i class="{php}echo $c['icon'] ?? 'icon-folder';{/php}"></i>
+                                <span class="title">{$c.name}</span>
+                                <span class="arrow "></span>
+                            </a>
+                            <ul class="sub-menu">
+                                {foreach name="cate1" item="v"}
+                                    {php}
+                                        $v_link = explode("/",$v['link']);
+                                        $v_link = strtolower($v_link[0]);
+                                    {/php}
+                                    {if condition="authcheck($v['link'], session('uid'))"}
+                                        {php}
+                                            $count1 = think\facade\Db::name('menu')->where('process_id=0 and level=2 and status=1 and pid='.$v['id'])->count('id');
+                                        {/php}
+                                        {if condition="$count1 eq 0"}
+                                            <li class="nav-item {if condition="($v['link'] eq $path) OR ($v_link eq $control)"}active open{/if}">
+                                                <a href="/{$v['link']}.html" class="nav-link">
+                                                    <i class="{php}echo $v['icon'] ?? 'icon-folder';{/php}"></i> 
+                                                    {$v.name} 
+                                                </a>
+                                            </li>
+                                        {else /}
+                                            <li class="nav-item {if condition="($v['link'] eq $path) OR ($v_link eq $control)"}active open{/if}">
+                                                <a href="javascript:;" target="_blank" class="nav-link">
+                                                    <i class="{php}echo $v['icon'] ?? 'icon-folder';{/php}"></i> {$v.name}
+                                                    <span class="arrow nav-toggle"></span>
+                                                </a>
+                                                <ul class="sub-menu">
+                                                    {php} 
+                                                        $cate2 = think\facade\Db::name('menu')->where('level=2 and status=1 and pid='.$v['id'])->order('sort')->select()->toArray();
+                                                    {/php}
+                                                    {foreach name="cate2" item="vv"}
+                                                        {php}
+                                                            $vv_link = explode("/",$vv['link']);
+                                                            $vv_link = strtolower($vv_link[0]);
+                                                        {/php}
+                                                        {if condition="authcheck($vv['link'], session('uid'))"}
+                                                        <li class="nav-item {if condition="($vv['link'] eq $path) OR ($vv_link eq $control)"}active open{/if}">
+                                                            <a href="#" class="nav-link">
+                                                                <i class="{php}echo $vv['icon'] ?? 'icon-folder';{/php}"></i> 
+                                                                {$vv.name}
+                                                            </a>
+                                                        </li>
+                                                        {/if}
+                                                    {/foreach}
+                                                </ul>
+                                            </li>
+                                        {/if}
+                                    {/if}
+                                {/foreach}
+                            </ul>
+                        </li>
+                    {/empty}
+                {/if}
+            {/foreach}
+
+            <!-- 流程模块菜单 -->
+            {php}
+                $process_type = think\facade\Db::name('process_type')->select()->toArray();
+                foreach ($process_type as &$value) {
+                    $where = 'type_id='.$value['id'].' and status=1';
+                    $process = think\facade\Db::name('process')->where($where)->order('orders DESC')->select()->toArray();
+                    $value['value'] = $process;
+                }
+            {/php}
+            {volist name="process_type" id="vo"}
+            <li class="nav-item process-nav">
+                {if condition="$vo['value'] neq null"}
+                    <a href="javascript:;" class="nav-link nav-toggle">
+                        <i class="{php}echo $vo['icon'] ?? 'icon-folder';{/php}"></i>
+                        <span class="title">{$vo['name']}</span>
+                        <span class="arrow"></span>
+                    </a>
+                    <ul class="sub-menu">
+                        {volist name="vo['value']" id="v"}
+                            {if condition="authcheck('process', session('uid'), 1, 'url', 'or', array(), $v['id'])"}
+                            <li class="nav-item {if condition="input('get.process_id') eq $v['id']"}active open{/if}">
+                                <a href="/process/index/process_id/{$v['id']}.html" class="nav-link">
+                                    <i class="{php}echo $v['icon'] ?? 'icon-folder';{/php}"></i>
+                                    <span class="title">{$v['name']}</span>
+                                </a>
+                            </li>
+                            {/if}
+                        {/volist}
+                        {php} 
+                            $process_cate = think\facade\Db::name('menu')->where('status=1 and process_id='.$vo['id'])->order('sort')->select()->toArray();
+                        {/php}
+                        {foreach name="process_cate" item="v"}
+                            {php} 
+                                $v_link = explode("/",$v['link']);
+                                $v_link = strtolower($v_link[0]);
+                            {/php}
+                            {if condition="authcheck($v['link'], session('uid'))"} 
+                                <li class="nav-item {if condition="($v['link'] eq $path) OR ($v_link eq $control)"}active{/if}">
+                                <a href="/{$v['link']}.html" class="nav-link">
+                                    <i class="{php}echo $v['icon'] ?? 'icon-folder';{/php}"></i>
+                                    <span class="title">{$v.name}</span>
+                                    {if condition="($v['link'] eq $path) OR ($v_link eq $control)"}
+                                        <span class="selected"></span>
+                                    {/if}
+                                </a>
+                                </li>
+                            {/if}
+                        {/foreach}
+                    </ul>
+                {else /}
+                    <a href="javascript:;" class="nav-link">{$vo['name']}</a>
+                {/if}
+            </li>
+            {/volist}
+        </ul>
+    </div>
+</div>
+
+<script>
+    $(function () {
+        //点击子菜单后，父菜单有一个被选中的样式
+        let $sidebar = $(".page-sidebar");
+        $sidebar.find(".active").each(function (i, n) {
+            let spans = '<span class="selected"></span>';
+            $(this).parent().parent("li").addClass('active open');
+            $(this).parent().parent("li").find("a").append(spans);
+            $(this).parent().parent("li").find(".arrow").addClass('open');
+            $(this).parent().parent().parent("li").addClass('active open');
+            $(this).parent().parent().parent("li").find("a").append(spans);
+        });
+        $sidebar.find(".process-nav").each(function (i, n) {
+            if ($(this).find("ul").find("li").length == 0) {
+                $(this).remove();
+            }
+        });
+        $sidebar.find(".heading").each(function (i, n) {
+            if ($(this).next(".nav-item").length == 0) {
+                $(this).remove();
+            }
+        });
+    });
+</script>

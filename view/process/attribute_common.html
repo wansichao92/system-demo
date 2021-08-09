@@ -1,0 +1,88 @@
+{php}$iscommon = false;{/php}
+<ul class="nav nav-tabs uppercase bold">
+    {volist name="fields" id="field"}
+        {if condition="in_array($field['isshow'], $isshow)"}
+            {if condition="in_array($field['type'], $model_array)"}
+                <li>
+                    <a href="#content_{$process_id}_{$field.name}" data-toggle="tab" aria-expanded="true">{$field['title']}</a>
+                </li>
+            {else /}
+                {php}
+                    if ($iscommon) {
+                        continue;
+                    } 
+                    $iscommon = true;
+                {/php}
+                <li class="active">
+                    <a href="#content_{$process_id}" data-toggle="tab" aria-expanded="true">基础信息</a>
+                </li>
+            {/if}
+            {if condition="strtolower(app('request')->action()) eq 'view'"}
+            <li>
+                <a href="#content_{$process_id}_audit" data-toggle="tab" aria-expanded="true">审核记录</a>
+            </li>
+            {/if}
+        {/if}
+    {/volist}
+</ul>
+<div class="tab-content">
+    {volist name="fields" id="field"}
+        {if condition="in_array($field['isshow'], $isshow)"}
+            {if condition="in_array($field['type'], $model_array)"}
+                <div class="tab-pane" id="content_{$process_id}_{$field.name}">
+                    {eq name="strtolower(app('request')->action())" value="add"} 
+                        {include file="process/attribute_repeater"}
+                    {else /}
+                        {include file="process/attribute_repeater_edit"}
+                    {/eq}
+                </div>
+            {/if}
+        {/if}
+    {/volist}
+    <div class="tab-pane active" id="content_{$process_id}">
+        {volist name="fields" id="field"}
+            {if condition="in_array($field['isshow'], $isshow)"}
+                {php}
+                    $field['value'] = handleLinktableValue(handleAttributeValue($field['value']));
+                    $disshow = (strtolower(app('request')->action())=='view' && $field['type']=='grade') ? false : true;
+                {/php}
+                {if condition="!in_array($field['type'], $model_array) and $disshow"}
+                    {include file="process/attribute"}
+                {/if}
+            {/if}
+        {/volist}
+    </div>
+    {if condition="strtolower(app('request')->action()) eq 'view'"}
+        <div class="tab-pane" id="content_{$process_id}_audit">
+            <div class="col-md-offset-0 col-md-12">
+                <div class="table-scrollable table-scrollable-borderless">
+                    <table class="table table-hover table-light">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>ID</th>
+                                <th>操作人</th>
+                                <th>操作时间</th>
+                                <th>操作状态</th>
+                                <th>备注</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {php}$auditLan = $auditLans + array(-2=>'挂起', -3=>'取消挂起');{/php}
+                            {volist name="auditlist" id="vo" key="index"}
+                                <tr>
+                                    <td>{$index}</td>
+                                    <td>{$vo.id}</td>
+                                    <td>{php}echo gettruename($vo['uid']);{/php}</td>
+                                    <td>{php}echo formatTime($vo['dateline']);{/php}</td>
+                                    <td>{php}echo $auditLan[$vo['audit']] ?? "备注";{/php}</td>
+                                    <td>{$vo.auditvalue ?? ''}</td>
+                                </tr>
+                            {/volist}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    {/if}
+</div>

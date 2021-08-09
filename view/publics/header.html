@@ -1,0 +1,153 @@
+<div class="page-header navbar navbar-fixed-top">
+    <div class="page-header-inner ">
+        <!-- logo -->
+        <div class="page-logo">
+            <a href="/">
+                <img src="/static/assets/layouts/layout/img/logo.png" alt="logo" class="logo-default"> </a>
+            <div class="menu-toggler sidebar-toggler">
+                <span></span>
+            </div>
+        </div>
+        <!-- 快捷入口 -->
+        <div class="theme-panel hidden-xs hidden-sm">
+            <div class="toggler w_kj"></div>
+            <div class="toggler-close w_gb"></div>
+            <div class="theme-options w_box">
+                <div class="theme-option theme-colors clearfix">
+                    <span>
+                        <i class='fa fa-paperclip'></i>
+                        快捷入口
+                    </span>
+                </div>
+                <div class="theme-option box2">
+                    <a href="" class="box_li" style="background:#796799">
+                        <span class='big_icon icon-info'></span><span class="wz">快捷入口1</span>
+                    </a>
+                    <a href="" class="box_li" style="background:#F33" target="new">
+                        <span class='big_icon icon-arrow-down'></span><span class="wz">快捷入口2</span>
+                    </a>
+                    <a href="" class="box_li" style="background:#093" target="new">
+                        <span class='big_icon icon-arrow-down'></span><span class="wz">快捷入口3</span>
+                    </a>
+                    <a href="" class="box_li" style="background:#F69" target="new">
+                        <span class='big_icon icon-arrow-down'></span><span class="wz">快捷入口4</span>
+                    </a>
+                    <a href="" class="box_li" style="background:#F60">
+                        <span class='big_icon icon-flag'></span><span class="wz">快捷入口5</span>
+                    </a>
+                    <a href="" class="box_li" style="background:#396">
+                        <span class='big_icon icon-screen-desktop'></span><span class="wz">快捷入口6</span>
+                    </a>
+                    <a href="" class="box_li" style="background:#2D5F8B">
+                        <span class='big_icon icon-note'></span><span class="wz">快捷入口7</span>
+                    </a>
+                    <a href="" class="box_li" style="background:#697380">
+                        <span class='big_icon icon-heart'></span><span class="wz">快捷入口8</span>
+                    </a>
+                    <a href="" class="box_li" style="background:#69C">
+                        <span class='big_icon icon-bell'></span><span class="wz">快捷入口9</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- 菜单收缩 -->
+        <a href="javascript:;" class="menu-toggler responsive-toggler" data-toggle="collapse"
+            data-target=".navbar-collapse">
+            <span></span>
+        </a>
+        <!-- 头像部分 + 头部功能按键 -->
+        <div class="top-menu">
+            <ul class="nav navbar-nav pull-right">
+                <li class="dropdown dropdown-extended dropdown-notification topmenu2-1">
+                    <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
+                        data-close-others="true">
+                        <i class="icon-clock"></i><span class="badge badge-default"></span>
+                    </a>
+                    <ul class="dropdown-menu" id="phonelist"></ul>
+                </li>
+                <li class="dropdown dropdown-extended dropdown-notification topmenu2-2" id="header_notification_bar">
+                    <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
+                        data-close-others="true">
+                        <i class="icon-bell"></i>
+                    </a>
+                    <ul class="dropdown-menu"></ul>
+                </li>
+                <li class="dropdown dropdown-user">
+                    <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown" data-close-others="true">
+                        {php}
+                            $headImg = think\facade\Db::name('file')->where('id',session('userInfo.tx_id'))->value('url');
+                        {/php}
+                        <img class="img-circle" src="{php}echo $headImg ?? '/static/assets/layouts/layout/img/avatar3_small.jpg';{/php}" />
+                        <span class="username username-hide-on-mobile">{php}echo session('userInfo.truename') ?? '姓名';{/php}</span>
+                        <i class="fa fa-angle-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-default">
+                        <li>
+                            <a href="/publics/info.html">
+                                <i class="icon-calendar"></i>
+                                个人资料
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/publics/updataPwd.html">
+                                <i class="icon-lock"></i>
+                                修改密码
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/publics/logout">
+                                <i class="icon-key"></i>
+                                退出登录
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="dropdown dropdown-quick-sidebar-toggler">
+                    <a href="javascript:;" class="dropdown-toggle">
+                        <i class="icon-logout"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <!-- 在职时间 -->
+        {php}
+        $Days = round((strtotime(date("Y-m-d"))-session('userInfo.starttime'))/3600/24);
+        $truename = session('userInfo.truename');
+        $startDay = date("Y/m/d",session('userInfo.starttime'));
+        {/php}
+        <div class="top-menu topmenu3">亲爱的{$truename}，自你{$startDay}来公司至今已在华邦度过了{$Days}天，加油，奥利给~</div>
+        <!-- 百度搜索快捷方式 -->
+        <div class="top-menu topmenu4">
+            <div class="input-group">
+                <input class="bdyx" name="bdyx" type="text" placeholder="百度搜索">
+                <a class="bdselect" href="javascript:;" class="btn"><i class="icon-magnifier"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 在线沟通 -->
+{include file="publics/chat"}
+
+<script type="text/javascript">
+    $(function () {
+        var screen_width = window.screen.width;
+        //根据屏幕分辨率判断是否是手机
+        if (screen_width > 500) {
+            $(".responsive-toggler").css({ "position": "absolute", "left": "50px" });
+        } else {
+            $(".topmenu4").hide();
+            $(".topmenu3").hide();
+            $(".topmenu2-1").hide();
+            $(".topmenu2-2").hide();
+        }
+        //百度搜索快捷方式
+        $(".bdselect").click(function () {
+            var val = $(".bdyx").val();
+            if (val) {
+                window.open("https://www.baidu.com/s?wd=" + val + "&rsv_spt=1&rsv_iqid=0x989638f30000155f&issp=1&f=8&rsv_bp=1&rsv_idx=2&ie=utf-8&tn=baiduhome_pg&rsv_enter=0&rsv_dl=tb&rsv_sug3=2&rsv_sug1=2&rsv_sug7=101&rsv_btype=i&prefixsug=%25E7%2599%25BE%25E5%25BA%25A6&rsp=0&inputT=2145&rsv_sug4=5351&rsv_sug=2");
+            } else {
+                window.open("https://www.baidu.com/");
+            }
+        })
+    })
+</script>

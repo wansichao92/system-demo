@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no, email=no">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="true">
+    <meta name="MobileOptimized" content="320">
+    <meta name="screen-orientation" content="portrait">
+    <meta name="x5-orientation" content="portrait">
+    <meta name="full-screen" content="yes">
+    <meta name="x5-fullscreen" content="true">
+    <meta name="browsermode" content="application">
+    <meta name="x5-page-mode" content="app">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta charset="UTF-8">
+    <meta name="csrf-param" content="_csrf">
+    <meta name="csrf-token" content="OFRDV0RhSUIOIDARIkwqKQw8d2RpLH01dTIZZQIHM3Z.Yxk0CBs/cQ==">
+    <title>Thinkphp6-开发框架</title>
+    {load href="__FRAME__/global/plugins/jquery.min.js"}
+    {load href="__CSS__/m-login-client.css"}
+    {load href="__CSS__/m-login.css"}
+</head>
+
+<body>
+    <div class="main_box">
+        <div class="container">
+            <div class="login_box">
+                <div class="head">
+                    <span class="c-e43f41">WSC-FRAME</span>
+                </div>
+                <div class="main_content">
+                    <div class="ali_mask">
+                        <div class="ali_box">
+                            <p>智能验证</p>
+                            <span class="close_ali_btn">
+                                <img src="__IMG__/m-login-slideVerify-close.png">
+                            </span>
+                            <div class="verify-wrap" id="verify-wrap"></div>
+                        </div>
+                    </div>
+                    <form class="login-form" action='/publics/login' method="post">
+                        <input type="hidden" name="verifycode" />
+                        <div class="input_group">
+                            <input type="tel" maxlength="5" autocomplete="off" id="username" placeholder="请输入工号" name="username" oninput="value=value.replace(/[^\d]/g,'')">
+                            <div class="icon clear_btn">
+                                <img width="17px" height="17px" src="__IMG__/m-login-close.png">
+                            </div>
+                        </div>
+                        <div class="input_group">
+                            <input type="password" autocomplete="off" id="password" placeholder="请输入密码" name="password">
+                            <div class="icon clear_btn">
+                                <img width="17px" height="17px" src="__IMG__/m-login-close.png">
+                            </div>
+                        </div>
+                        <div class="btn" disabled="" id="login">登录</div>
+                        <button type="submit" class="btn" style="display:none;">登录</button>
+                    </form>
+                </div>
+            </div>
+            <div class="onetext">
+                <p>"{$oneText}"</p>
+            </div>
+        </div>
+        <div class="copyright">© 2021 wsc92.cn 赣ICP备19008489号-1</div>
+    </div>
+</body>
+{include file='publics/script'}
+{load href="__JS__/m-login.js"}
+{load href="__JS__/jq-slideVerify.js"}
+
+</html>

@@ -1,0 +1,65 @@
+<div class="portlet light bordered form-fit">
+    <div class="portlet-title">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+        <div class="caption">
+            <i class="icon-user font-blue-hoki"></i>
+            <span class="caption-subject font-blue-hoki bold uppercase">详情</span>
+            <span class="caption-helper"></span>
+        </div>
+    </div>
+    <div class="portlet-body form">
+        <form class="form-horizontal form-bordered form-row-stripped pageForm">
+            <div class="form-body">
+                {php}
+                    $isshow = array(1,2,3,5);
+                {/php}
+                {volist name="fields" id="field"}
+                    {if condition="in_array($field['isshow'], $isshow)"}
+                        {include file="process/attribute"}
+                    {/if}
+                {/volist}
+            </div>
+            <div class="form-actions">
+                <div class="row">
+                    <div class="col-md-offset-3 col-md-9">
+                        <button type="button" class="btn default" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- add_edit_common -->
+{load href="__FRAME__/global/plugins/jquery-repeater/jquery.repeater.js"} 
+{load href="__FRAME__/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker3.min.css"} 
+{load href="__FRAME__/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.css"} 
+{load href="__FRAME__/global/plugins/bootstrap-markdown/css/bootstrap-markdown.min.css"} 
+{load href="__FRAME__/global/plugins/jquery-validation/js/jquery.validate.min.js"} 
+{load href="__FRAME__/global/plugins/jquery-validation/js/additional-methods.min.js"} 
+{load href="__FRAME__/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker.min.js"} 
+{load href="__FRAME__/global/plugins/bootstrap-wysihtml5/wysihtml5-0.3.0.js"} 
+{load href="__FRAME__/global/plugins/bootstrap-wysihtml5/bootstrap-wysihtml5.js"} 
+{load href="__FRAME__/global/plugins/ckeditor/ckeditor.js"} 
+{load href="__FRAME__/global/plugins/bootstrap-markdown/lib/markdown.js"} 
+{load href="__FRAME__/global/plugins/bootstrap-markdown/js/bootstrap-markdown.js"} 
+{load href="__FRAME__/global/plugins/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css"}
+{load href="__FRAME__/global/plugins/bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js"}
+<script>
+    var web_url = "__APP__";
+    $(function(){
+        $("#pageform").find('input').attr('disabled', true);
+        $(".datetime-picker").datetimepicker({
+            isRTL: App.isRTL(),
+            format: "yyyy-mm-dd hh:ii",
+            autoclose: true,
+            todayBtn: true,
+            pickerPosition: (App.isRTL() ? "bottom-right" : "bottom-left"),
+            minuteStep: 10
+        });
+        linkage();
+        //隐藏元素内的INPUT都不作必填验证
+        $('.pageForm').find('div:hidden').each(function(){
+            $(this).find('input').addClass("ignore");
+        });
+    });
+</script>

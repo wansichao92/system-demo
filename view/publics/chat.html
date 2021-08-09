@@ -1,0 +1,388 @@
+<input type="hidden" name="uid" value='{php}echo session('uid');{/php}'>
+<input type="hidden" name="private-uid" value="">
+
+<a href="javascript:;" class="page-quick-sidebar-toggler">
+    <i class="icon-login"></i>
+</a>
+<div class="page-quick-sidebar-wrapper" data-close-on-body-click="false">
+    <div class="page-quick-sidebar">
+        <ul class="nav nav-tabs">
+            <li class="active">
+                <a href="javascript:;" data-target="#quick_sidebar_tab_1" data-toggle="tab">
+                    联系人
+                    <span class="badge badge-danger link-count"></span>
+                </a>
+            </li>
+            <li>
+                <a href="javascript:;" class="public-chat" data-target="#quick_sidebar_tab_2" data-toggle="tab">
+                    群聊
+                    <span class="badge badge-success">7</span>
+                </a>
+            </li>
+            <li class="dropdown">
+                <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
+                    其他
+                    <i class="fa fa-angle-down"></i>
+                </a>
+                <ul class="dropdown-menu pull-right">
+                    <li>
+                        <a href="javascript:;" data-target="#quick_sidebar_tab_3" data-toggle="tab">
+                            <i class="icon-bell"></i> 其他1 
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript:;" data-target="#quick_sidebar_tab_3" data-toggle="tab">
+                            <i class="icon-info"></i> 其他2 
+                        </a>
+                    </li>
+                    <li>
+                        <a href="javascript:;" data-target="#quick_sidebar_tab_3" data-toggle="tab">
+                            <i class="icon-speech"></i> 其他3 
+                        </a>
+                    </li>
+                    <li class="divider"></li>
+                    <li>
+                        <a href="javascript:;" data-target="#quick_sidebar_tab_3" data-toggle="tab">
+                            <i class="icon-settings"></i> 其他4 
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane active page-quick-sidebar-chat" id="quick_sidebar_tab_1">
+                <div class="page-quick-sidebar-list">
+                    <div class="page-quick-sidebar-chat-users" data-rail-color="#ddd" data-wrapper-class="page-quick-sidebar-list" data-height="872" data-initialized="1">
+                        <h3 class="list-heading">在线人员</h3>
+                        <ul class="media-list list-items" id="link-list">
+                            <!-- 在线列表 -->
+                        </ul>
+                    </div>
+                    <div class="slimScrollBar"></div>
+                    <div class="slimScrollRail"></div>
+                </div>
+                <!-- 私聊模块 -->
+                <div class="page-quick-sidebar-item">
+                    <div class="page-quick-sidebar-chat-user">
+                        <div class="page-quick-sidebar-nav">
+                            <a href="javascript:;" class="page-quick-sidebar-back-to-list">
+                                <i class="icon-arrow-left"></i>返回人员列表
+                            </a>
+                        </div>
+                        <div class="slimScrollDiv">
+                            <div id="message-one" class="page-quick-sidebar-chat-user-messages" data-height="767" data-initialized="1">
+                                <!-- 私聊面板 -->
+                            </div>
+                            <div class="slimScrollBar"></div>
+                            <div class="slimScrollRail"></div>
+                        </div>
+                        <div class="page-quick-sidebar-chat-user-form">
+                            <div class="input-group">
+                                <input id="chat-private-text" type="text" class="form-control-notjs" placeholder="">
+                                <div class="input-group-btn private-but tooltips" onclick="send_chat_private()" data-original-title=""> 
+                                    <button type="button" class="btn green">
+                                        <i class="icon-paper-clip"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane page-quick-sidebar-alerts page-quick-sidebar-chat" id="quick_sidebar_tab_2">
+                <div class="slimScrollDiv">
+                    <div class="page-quick-sidebar-alerts-list" data-height="867" data-initialized="1">
+                        <!-- 群聊模块 -->
+                        <div class="page-quick-sidebar-chat-user">
+                            <div class="slimScrollDiv">
+                                <div id="message" class="page-quick-sidebar-chat-user-messages" data-height="767" data-initialized="1">
+                                    <!-- 群聊面板 -->
+                                </div>
+                                <div class="slimScrollBar"></div>
+                                <div class="slimScrollRail"></div>
+                            </div>
+                            <div class="page-quick-sidebar-chat-user-form">
+                                <div class="input-group">
+                                    <input id="chat-room-text" type="text" class="form-control-notjs" placeholder="">
+                                    <div class="input-group-btn public-but tooltips" onclick="send_chat_public()" data-original-title="">
+                                        <button type="button" class="btn green">
+                                            <i class="icon-paper-clip"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slimScrollBar"></div>
+                    <div class="slimScrollRail"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var wsServer = 'ws://wsc92.cn:9502';
+    var websocket = new WebSocket(wsServer);
+    
+    websocket.onopen  = res => {console.log('链接成功')}; //建立链接
+    websocket.onclose = res => {console.log('关闭链接')}; //关闭链接
+    websocket.onerror = res => {console.log('错误：'+res.data)}; //错误
+    
+    // 会话逻辑
+    websocket.onmessage = res => {
+        var text = res.data;
+        if(text.indexOf("_open_:")>=0){ 
+            // 链接成功绑定用户
+            var fd = text.split('_open_:')[1];
+            $.ajax({
+				url : '/chat/bindUid',
+				type: 'POST',
+				data: {"set_fd": fd},
+				success: res => {
+					console.log(res + '已链接客户端');
+				}
+			})
+        }else if(text.indexOf("_count_:")>=0){
+            // 在线名单
+            var fdArr = text.split('_count_:')[1];
+            $.ajax({
+				url : '/chat/linkList',
+				type: 'POST',
+				data: {"links": fdArr},
+				success: res => {
+                    $("#link-list").html('');
+                    var uid = $("input[name='uid']").val();
+                    $.each(res,function(i, data){
+                        if(data.uid!==uid){
+                            $("#link-list").append("<li class='media link-user' data-uid='"+data.uid+"'><div class='media-status'><span class='badge badge-success'>8</span></div><img class='media-object' src='"+data.headImg+"'><div class='media-body'><h4 class='media-heading'>"+data.name+"</h4><div class='media-heading-sub'> "+data.group+"，工号"+data.uid+" </div></div></li>");  
+                        }
+                    })
+                    $(".link-count").text(res.length-1);
+                }
+			})
+        }else if(text.indexOf("_public_out_:")>=0){
+            // 群聊-接收的信息
+            var fd = text.split('_public_out_:')[0];
+            $.ajax({
+				url : '/chat/bindUid',
+				type: 'POST',
+				data: {"get_fd": fd},
+				success: res => {
+					var uid = $("input[name='uid']").val();
+                    if(res[1]==uid){
+                        var type = 'in';
+                        var name = '我';
+                    }else{
+                        var type = 'out';
+                        var name = res[0];
+                    }
+                    var msg = text.split('_public_out_:')[1];
+                    message_append_public(type, name, msg, '', res[2]);
+                }
+			})
+        }else if(text.indexOf("_public_in_:")>=0){
+            // 群聊-发送的信息
+            var type = 'in';
+            var name = '我'; 
+            var msg  = text.split('_public_in_:')[1];
+            message_append_public(type, name, msg);
+            msg_log(0,1,msg);
+        }else if(text.indexOf("_private_out_:")>=0){
+            // 私聊-接收的信息
+            var fd = text.split('_private_out_:')[0];
+            $.ajax({
+				url : '/chat/bindUid',
+				type: 'POST',
+				data: {"get_fd": fd},
+				success: res => {
+                    var type = 'out';
+                    var name = res[0];
+                    var msg  = text.split('_private_out_:')[1];
+                    var talker = $("input[name='private-uid']").val();
+                    message_append_private(type, name, msg, talker, '', res[2]);
+                }
+			})
+        }else if(text.indexOf("_private_in_:")>=0){
+            // 私聊-发送的信息
+            var type   = 'in';
+            var name   = '我'; 
+            var msg    = text.split('_private_in_:')[1];
+            var talker = $("input[name='private-uid']").val();
+            message_append_private(type, name, msg, talker);
+            msg_log(talker,2,msg);
+        }
+    };
+    
+    // 发送聊天内容（公聊）
+    function send_chat_public(){
+        var chatmsg = $("#chat-room-text").val().trim();
+        if(chatmsg){
+            var chat = JSON.stringify({
+                "chatType": 'public', 
+                "chatMsg" : chatmsg
+            });
+            websocket.send(chat);
+            $("#chat-room-text").val('');
+        }else{
+            $(".public-but").attr("data-original-title", "不能发送空白信息！");
+            $("#chat-room-text").attr("placeholder", "不能发送空白信息！");
+        }
+        $("#chat-room-text").focus();
+    }
+
+    $(document).on('input propertychange', '#chat-room-text', function() {
+        $(".public-but").attr("data-original-title", "");
+        $("#chat-room-text").attr("placeholder", "");
+    })
+
+    $(document).on('input propertychange', '#chat-private-text', function() {
+        $(".private-but").attr("data-original-title", "");
+        $("#chat-private-text").attr("placeholder", "");
+    })
+
+    // 发送聊天内容（私聊）
+    function send_chat_private(){
+        var chatmsg  = $("#chat-private-text").val().trim();
+        var chatto   = $("input[name='private-uid']").val();
+        var chatFrom = $("input[name='uid']").val();
+        if(chatmsg){
+            $.ajax({
+				url : '/chat/privateIn',
+				type: 'POST',
+				data: {"chatFrom": chatFrom, "chatTo": chatto},
+				success: res => {
+                    var chat = JSON.stringify({
+                        "chatType" : 'private', 
+                        "chatTo"   : res[0], 
+                        "chatFrom" : res[1],
+                        "chatMsg"  : chatmsg
+                    });
+                    websocket.send(chat);
+                }
+			})
+            $("#chat-private-text").val('');
+        }else{
+            $(".private-but").attr("data-original-title", "不能发送空白信息！");
+            $("#chat-private-text").attr("placeholder", "不能发送空白信息！");
+        }
+        $("#chat-private-text").focus();
+    }
+    
+    // 键盘发送事件 
+    $(document).keydown(event => {
+        if(event.keyCode==13){
+            send_chat_public();
+            send_chat_private();
+        }
+    });
+
+    // 展示聊天面板内容（公聊）
+    function message_append_public(type, name, msg, msgDate='', headImg=''){
+        if(!headImg){
+            var headImg = $(".img-circle").attr('src');
+        }
+
+        if(!msgDate){
+            var msgDate = nowTime();
+        }
+        
+        $("#message").append("<div class='post "+type+"'><img class='avatar' src='"+headImg+"'><div class='message'><span class='arrow'></span><span class='name'>"+name+"</span><span class='datetime'>"+msgDate+"</span><span class='body'>"+msg+"</span></div></div>");
+    }
+    
+    // 展示聊天面板内容（私聊）
+    function message_append_private(type, name, msg, talker, msgDate='', headImg=''){
+        if(!headImg){
+            var headImg = $(".img-circle").attr('src');
+        }
+
+        var msgto = $("input[name='private-uid']").val();
+
+        if(!msgDate){
+            var msgDate = nowTime();
+        }
+        
+        if(msgto==talker){
+            $("#message-one").append("<div class='post "+type+"'><img class='avatar' src='"+headImg+"'><div class='message'><span class='arrow'></span><span class='name'>"+name+"</span><span class='datetime'>"+msgDate+"</span><span class='body'>"+msg+"</span></div></div>"); 
+        }
+    }
+
+    // 当前时间
+    function nowTime(){
+        var myDate  = new Date;
+        var Y = myDate.getFullYear();
+        var M = myDate.getMonth()+1<10 ? '0'+myDate.getMonth()+1 : myDate.getMonth()+1;
+        var D = myDate.getDate()<10 ? '0'+myDate.getDate() : myDate.getDate();
+        var h = myDate.getHours()<10 ? '0'+myDate.getHours() : myDate.getHours();
+        var m = myDate.getMinutes()<10 ? '0'+myDate.getMinutes() : myDate.getMinutes();
+        var s = myDate.getSeconds()<10 ? '0'+myDate.getSeconds() : myDate.getSeconds();
+        var msgDate = Y + "-" + M + "-" + D + " " + h + ":" + m + ":" + s;
+
+        return msgDate;
+    }
+
+    // 保存聊天记录
+    function msg_log(talker, msg_type, msg_text){
+        $.ajax({
+            url : '/chat/msgLog',
+            type: 'POST',
+            data: {"talker": talker, "msg_type": msg_type, "msg_text": msg_text}
+        })
+    }
+
+    // 打开私聊界面 
+    $(document).on('click', '.link-user', function() {
+        $(this).parents("#quick_sidebar_tab_1").attr("class","tab-pane active page-quick-sidebar-chat page-quick-sidebar-content-item-shown");
+        var privateUid = $(this).attr("data-uid");
+        var uid = $("input[name='uid']").val();
+        $("input[name='private-uid']").val(privateUid);
+        $("#message-one").html('');
+        // 获取聊天记录
+        $.ajax({
+            url : '/chat/getPrivateMsgLog',
+            type: 'POST',
+            data: {"talker": privateUid, "msg_type": 2},
+            success: res => {
+                $.each(res,function(i, data){
+                    if(data.sender==uid){
+                        var type    = 'in';
+                        var name    = '我';
+                        var talker  = data.talker;
+                        var headImg = '';
+                    } else{
+                        var type    = 'out';
+                        var name    = data.sendername;
+                        var talker  = data.sender;
+                        var headImg = data.url;
+                    }
+                    message_append_private(type, name, data.msg_text, talker, data.create_time, headImg);
+                })
+            }
+        })
+    });
+
+    // 获取公聊聊天记录 
+    $(document).on('click', '.public-chat', function() {
+        var res = $("#quick_sidebar_tab_2").is(":hidden");
+        if(res){
+            var uid = $("input[name='uid']").val();
+            $.ajax({
+                url : '/chat/getPublicMsgLog',
+                type: 'POST',
+                data: {"msg_type": 1},
+                success: res => {
+                    $.each(res,function(i, data){
+                        if(data.sender==uid){
+                            var type = 'in';
+                            var name = '我';
+                        }else{
+                            var type = 'out';
+                            var name = data.sendername;
+                        }
+                        message_append_public(type, name, data.msg_text, data.create_time, data.url);
+                    })
+                }
+            })
+        }
+    });
+</script>

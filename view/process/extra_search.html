@@ -1,0 +1,25 @@
+{switch name="process_id"}
+    {case value="1"}
+        <div class="form-group col-md-6">
+            <label class="control-label col-md-3">部门</label>
+            <div class="col-md-9">
+                <div class="input-group tree-content">
+                    <input type="text" class="form-control search-tree-input" value="请选择部门筛选" placeholder="请选择部门筛选" readonly />
+                    <input name="hr_group_id" type="hidden" class="form-control search-tree-id" />
+                    <span class="input-group-btn">
+                        <button class="btn default date-range-toggle search-tree-close" type="button">
+                            <i class="fa fa-close"></i>
+                        </button>
+                    </span>
+                    <div class="response none"></div>
+                    <div class="search-tree-box">
+                        <div class="portlet-body">
+                            <div class="tree_4 tree-demo"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {/case}
+    {default /}
+{/switch}

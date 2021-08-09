@@ -1,0 +1,27 @@
+{extend name="base/base"}
+{block name="bodycontent"}
+    <div class="page-bar">
+        <ul class="page-breadcrumb">
+            <li>
+                <a href="/">首页</a>
+                <i class="fa fa-angle-right"></i>
+            </li>
+            <li>
+                <span>{$pageTitle ?? '标题'}</span>
+            </li>
+        </ul>
+    </div>
+    <h1 class="page-title">
+        {$pageTitle ?? '标题'}
+        <small>{$smallTitle}</small>
+    </h1>
+    <div class="note note-info">
+        <h4 class="block">功能说明</h4>
+        <p>控制器：Crontab</p>
+        <p>任务发送器：crontab文件夹下*.php文件</p>
+        <p>计划任务日志：public/crontab_log/*.log文件</p>
+    </div>
+{/block}
+{block name="inc"}
+    {load href="__FRAME__/global/css/components.min.css"}
+{/block}
